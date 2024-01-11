@@ -10,6 +10,7 @@ function HomePage() {
       <Link to="/products">View Products</Link>
       <br></br>
       <Link to="/login">Login</Link>
+      <Link to="/register">Register</Link>
       {/* Add more components like featured products, etc. here */}
     </div>
   );
