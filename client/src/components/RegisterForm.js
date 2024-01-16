@@ -16,16 +16,16 @@ function RegisterForm() {
 
     useEffect(() => {
         if (isAuthenticated()) {
-            navigate('/dashboard');
+            navigate('/');
         }
     }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/register', { username, email, password });
+            const response = await axios.post('http://localhost:3001/register', { username, email, password }, { withCredentials: true });
             // Handle successful registration...
-            navigate('/login');
+            navigate('/');
         } catch (error) {
             if (error.response) {
                 setError(error.response.data.message);

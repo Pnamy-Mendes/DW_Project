@@ -1,9 +1,56 @@
-.form-container {
-    max-width: 300px;
-    margin: auto;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Add this to your main CSS file */
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('../src/media/123.png') no-repeat center center fixed;
+    background-size: cover;
 }
+
+.form-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transform: perspective(500px) rotateY(10deg); /* 3D effect */
+    width: 300px;
+}
+
+.input-field {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.button {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
 
 .login-form, .register-form {
     display: flex;

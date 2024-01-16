@@ -2,7 +2,7 @@
 import Cookies from 'js-cookie';
 
 const isAuthenticated = () => {
-    // Check if the authentication cookie is set
+    // Check if the userInfo cookie is set
     return !!Cookies.get('userInfo');
 };
 
