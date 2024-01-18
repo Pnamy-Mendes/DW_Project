@@ -9,11 +9,14 @@ const corsOptions = {
     origin: 'http://localhost:3000', // Replace with your frontend's URL
     credentials: true,
 };
+const productRoutes = require('./routes/productRoutes'); // Import the routes
+
 
 // Middleware 
 app.use(cors(corsOptions));
 app.use(express.json()); // For parsing application/json
 app.use(cookieParser());
+app.use('/api/products', productRoutes); // Use the routes
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/ecommerce', {

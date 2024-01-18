@@ -32,7 +32,13 @@ router.post('/register', async (req, res) => {
         });
         await newUser.save();
 
-        res.cookie('userInfo', { userId: newUser._id, username: newUser.username, email: newUser.email }, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
+        res.cookie('userInfo', { userId: newUser._id, username: newUser.username}, {
+            /*  httpOnly: true, */
+            secure: true, 
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'Lax'}
+        );
+
         res.status(201).json({ message: "User created successfully", user: { id: newUser._id, username: newUser.username, email: newUser.email } });
     } catch (error) {
         console.error(error);
@@ -49,7 +55,13 @@ router.post('/login', async (req, res) => {
 
         if (user && bcrypt.compareSync(password, user.password)) {
             // Authentication successful
-            res.cookie('userInfo', { username: user.username, email: user.email }, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 }); // 30 days
+            res.cookie('userInfo', { userId: newUser._id, username: newUser.username}, {
+                /*  httpOnly: true, */
+                secure: true, 
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                sameSite: 'Lax'}
+            );
+
             res.status(200).json({ message: "Login successful", user: { id: user._id, username: user.username } });
         } else {
             // Authentication failed

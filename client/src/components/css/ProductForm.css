@@ -1,0 +1,44 @@
+.product-form-container {
+    perspective: 1000px;
+    margin: 20px;
+}
+
+.product-form {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px; 
+    /* transform: rotateY(20deg); */
+    transition: transform 0.3s ease;
+}
+
+.product-form:hover {
+    transform: rotateY(0deg);
+}
+
+.product-form input[type="text"],
+.product-form input[type="number"],
+.product-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.product-form input[type="file"] {
+    margin: 10px 0;
+}
+
+.product-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.product-form button:hover {
+    background-color: #0056b3;
+}
