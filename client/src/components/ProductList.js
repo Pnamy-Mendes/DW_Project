@@ -1,3 +1,5 @@
+import './css/ProductList.css';  
+
 function ProductList({ products, onEdit, onDelete, onSort, sortConfig }) {
 
     const getSortArrow = (field) => {
@@ -11,7 +13,7 @@ function ProductList({ products, onEdit, onDelete, onSort, sortConfig }) {
     };
 
     return (
-        <table>
+        <table className="table">
             <thead>
                 <tr>
                     <th onClick={() => onSort('name')}>
