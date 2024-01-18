@@ -1,51 +1,63 @@
-import './css/ProductList.css';  
+import React from 'react';
+import { DataTable } from 'mantine-datatable';
+import './css/ProductList.css'; // Ensure this contains the styles you want
 
 function ProductList({ products, onEdit, onDelete, onSort, sortConfig }) {
+    const columns = [
+        {
+            accessor: 'name',
+            title: 'Name',
+            render: ({ name }) => name + (sortConfig.field === 'name' ? getSortArrow('name') : ''),
+            headerProps: { onClick: () => onSort('name') }
+        },
+        {
+            accessor: 'price',
+            title: 'Price',
+            render: ({ price }) => `$${price}` + (sortConfig.field === 'price' ? getSortArrow('price') : ''),
+            headerProps: { onClick: () => onSort('price') }
+        },
+        {
+            accessor: 'category',
+            title: 'Category',
+            render: ({ category }) => category + (sortConfig.field === 'category' ? getSortArrow('category') : ''),
+            headerProps: { onClick: () => onSort('category') }
+        },
+        {
+            accessor: 'promoDetails',
+            title: 'Promo Details',
+            render: ({ promoDetails }) => promoDetails + (sortConfig.field === 'promoDetails' ? getSortArrow('promoDetails') : ''),
+            headerProps: { onClick: () => onSort('promoDetails') }
+        },
+        {
+            accessor: 'actions',
+            title: 'Actions',
+            render: (record) => (
+                <>
+                    <button onClick={() => onEdit(record)}>Edit</button>
+                    <button onClick={() => onDelete(record._id)}>Delete</button>
+                </>
+            )
+        }
+    ];
 
     const getSortArrow = (field) => {
         if (sortConfig && sortConfig.field === field) {
-            const isAscending = sortConfig.direction === 'asc';
-            const arrowSymbol = isAscending ? '↑' : '↓';
-            const arrowClass = isAscending ? 'sort-arrow-asc' : 'sort-arrow-desc';
-            return <span className={arrowClass}>{arrowSymbol}</span>;
+            return sortConfig.direction === 'asc' ? '↑' : '↓';
         }
         return '';
     };
 
     return (
-        <table className="table">
-            <thead>
-                <tr>
-                    <th onClick={() => onSort('name')}>
-                        Name {getSortArrow('name')}
-                    </th>
-                    <th onClick={() => onSort('price')}>
-                        Price {getSortArrow('price')}
-                    </th>
-                    <th onClick={() => onSort('category')}>
-                    Category {getSortArrow('category')}
-                    </th>
-                    <th onClick={() => onSort('promoDetails')}>
-                    Promo Details {getSortArrow('promoDetails')}
-                    </th>
-                    <th> Actions </th> 
-                </tr>
-            </thead>
-            <tbody>
-                {products.map(product => (
-                    <tr key={product._id}>
-                        <td>{product.name}</td>
-                        <td>${product.price}</td>
-                        <td>{product.category}</td>
-                        <td>{product.promoDetails}</td>
-                        <td>
-                            <button onClick={() => onEdit(product)}>Edit</button>
-                            <button onClick={() => onDelete(product._id)}>Delete</button>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <DataTable
+            withBorder
+            borderRadius="sm"
+            withColumnBorders
+            striped
+            highlightOnHover
+            records={products}
+            columns={columns}
+            onRowClick={(record) => alert(`You clicked ${record.name}`)}
+        />
     );
 }
 
