@@ -24,17 +24,17 @@ function ProductManagement() {
         }
         setSortConfig({ field, direction });
 
-        // Implement the sorting logic based on field and direction
-        // Example sorting logic (adjust as needed):
         const sortedProducts = [...products].sort((a, b) => {
-            if (field === 'name') { // Assuming 'name' is a field to sort by
-                if (direction === 'asc') return a.name.localeCompare(b.name);
-                else return b.name.localeCompare(a.name);
+            if (direction === 'asc') {
+                return a[field] > b[field] ? 1 : -1;
+            } else {
+                return a[field] < b[field] ? 1 : -1;
             }
-            return 0;
         });
+
         setProducts(sortedProducts);
     };
+
 
 
     const applyFilter = () => {

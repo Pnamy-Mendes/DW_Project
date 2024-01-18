@@ -26,9 +26,7 @@ function ProductList({ products, onEdit, onDelete, onSort, sortConfig }) {
                     <th onClick={() => onSort('promoDetails')}>
                     Promo Details {getSortArrow('promoDetails')}
                     </th>
-                    <th onClick={() => onSort('actions')}>
-                    Actions {getSortArrow('actions')}
-                    </th> 
+                    <th> Actions </th> 
                 </tr>
             </thead>
             <tbody>
