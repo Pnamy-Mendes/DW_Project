@@ -17,10 +17,22 @@ router.post('/', async (req, res) => {
 // GET all products
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find({});
+        let query = {};
+
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+        if (req.query.minPrice) {
+            query.price = { $gte: req.query.minPrice };
+        }
+        if (req.query.maxPrice) {
+            query.price = { ...query.price, $lte: req.query.maxPrice };
+        }
+
+        const products = await Product.find(query);
         res.json(products);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error', error });
     }
 });
 

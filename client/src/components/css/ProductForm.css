@@ -42,3 +42,12 @@
 .product-form button:hover {
     background-color: #0056b3;
 }
+
+
+.sort-arrow-asc {
+    color: green;
+}
+
+.sort-arrow-desc {
+    color: red;
+}

@@ -6,38 +6,48 @@ import ProductForm from './ProductForm';
 function ProductManagement() {
     const [products, setProducts] = useState([]);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [filter, setFilter] = useState({ category: '', minPrice: '', maxPrice: '' });
+    const [sortConfig, setSortConfig] = useState({ field: null, direction: null });
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
-
-    const handleSort = (field, direction) => {
-        const sortedProducts = [...products].sort((a, b) => {
-            if (direction === 'asc') {
-                return a[field] > b[field] ? 1 : -1;
-            } else {
-                return a[field] < b[field] ? 1 : -1;
-            }
-        });
-        setProducts(sortedProducts);
-    };
-
-    const [filter, setFilter] = useState({ category: '', minPrice: '', maxPrice: '' });
+        fetchProducts(filter); // Fetch products whenever filter changes
+    }, [filter]); // Add filter as a dependency
 
     const handleFilterChange = (e) => {
         setFilter({ ...filter, [e.target.name]: e.target.value });
     };
 
+    const handleSort = (field) => {
+        let direction = 'asc';
+        if (sortConfig.field === field && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ field, direction });
+
+        // Implement the sorting logic based on field and direction
+        // Example sorting logic (adjust as needed):
+        const sortedProducts = [...products].sort((a, b) => {
+            if (field === 'name') { // Assuming 'name' is a field to sort by
+                if (direction === 'asc') return a.name.localeCompare(b.name);
+                else return b.name.localeCompare(a.name);
+            }
+            return 0;
+        });
+        setProducts(sortedProducts);
+    };
+
+
     const applyFilter = () => {
         fetchProducts(filter);
     };
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (filterCriteria) => {
         try {
-            const response = await axios.get('http://localhost:3001/api/products');
+            const queryParams = new URLSearchParams(filterCriteria).toString();
+            const response = await axios.get(`http://localhost:3001/api/products?${queryParams}`);
             setProducts(response.data);
         } catch (error) {
-            console.error('Error fetching products', error);
+            console.error('Error fetching products:', error);
         }
     };
 
@@ -75,9 +85,30 @@ function ProductManagement() {
     
 
     return (
-        <div className="product-management">
+            <div className="product-management">
+             <input
+                type="text"
+                name="category"
+                value={filter.category}
+                onChange={handleFilterChange}
+                placeholder="Category"
+            />
+            <input
+                type="number"
+                name="minPrice"
+                value={filter.minPrice}
+                onChange={handleFilterChange}
+                placeholder="Min Price"
+            />
+            <input
+                type="number"
+                name="maxPrice"
+                value={filter.maxPrice}
+                onChange={handleFilterChange}
+                placeholder="Max Price"
+            />
             <ProductForm onSubmit={handleSubmit} initialData={editingProduct} />
-            <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />
+            <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} onSort={handleSort} sortConfig={sortConfig} />
         </div>
     );
 }

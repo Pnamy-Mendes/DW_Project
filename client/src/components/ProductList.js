@@ -1,28 +1,34 @@
-import React, { useState } from "react";
+function ProductList({ products, onEdit, onDelete, onSort, sortConfig }) {
 
-function ProductList({ products, onEdit, onDelete }) {
-    
-    if (!products || products.length === 0) {
-        return <div>No products available in the database.</div>;
-    }
-
-    const [sortDirection, setSortDirection] = useState('asc');
-
-    const handleSort = (field) => {
-        const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-        setSortDirection(newDirection);
-        onSort(field, newDirection);
+    const getSortArrow = (field) => {
+        if (sortConfig && sortConfig.field === field) {
+            const isAscending = sortConfig.direction === 'asc';
+            const arrowSymbol = isAscending ? '↑' : '↓';
+            const arrowClass = isAscending ? 'sort-arrow-asc' : 'sort-arrow-desc';
+            return <span className={arrowClass}>{arrowSymbol}</span>;
+        }
+        return '';
     };
-    
+
     return (
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Category</th>
-                    <th>Promo Details</th>
-                    <th>Actions</th>
+                    <th onClick={() => onSort('name')}>
+                        Name {getSortArrow('name')}
+                    </th>
+                    <th onClick={() => onSort('price')}>
+                        Price {getSortArrow('price')}
+                    </th>
+                    <th onClick={() => onSort('category')}>
+                    Category {getSortArrow('category')}
+                    </th>
+                    <th onClick={() => onSort('promoDetails')}>
+                    Promo Details {getSortArrow('promoDetails')}
+                    </th>
+                    <th onClick={() => onSort('actions')}>
+                    Actions {getSortArrow('actions')}
+                    </th> 
                 </tr>
             </thead>
             <tbody>
@@ -42,6 +48,5 @@ function ProductList({ products, onEdit, onDelete }) {
         </table>
     );
 }
-  
-// In ProductList.js
+
 export default ProductList;
