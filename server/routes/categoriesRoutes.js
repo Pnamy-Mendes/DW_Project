@@ -1,5 +1,5 @@
 // categoriesRoute.js
-
+const mongoose = require('mongoose');
 const express = require('express');
 const Category = require('../models/Category'); // Ensure the path is correct
 
@@ -19,12 +19,23 @@ router.get('/', async (req, res) => {
 // Get subcategories for a given category
 router.get('/:categoryId/subcategories', async (req, res) => {
     try {
+        // Fetch subcategories based on parentCategory
         const subcategories = await Category.find({ parentCategory: req.params.categoryId });
-        res.json(subcategories);
+
+        // For each subcategory, fetch its sub-subcategories
+        const subcategoriesWithChildren = await Promise.all(subcategories.map(async (subcategory) => {
+            const children = await Category.find({ parentCategory: subcategory._id });
+            return { ...subcategory.toObject(), children };
+        }));
+
+        res.json(subcategoriesWithChildren);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Error fetching subcategories', error: err.message });
     }
 });
+
+
 
 // Get a single category by ID
 router.get('/:categoryId', async (req, res) => {

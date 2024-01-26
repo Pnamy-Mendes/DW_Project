@@ -15,33 +15,64 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     const [selectedSubCategory, setSelectedSubCategory] = useState(null);
     const [selectedSubSubCategories, setSelectedSubSubCategories] = useState([]);
 
+    const subSubCategoryIds = selectedSubSubCategories.map(subSubCat => subSubCat._id);
+    const productToSubmit = {
+        ...product,
+        subSubCategories: subSubCategoryIds,
+    };
+
+    onSubmit(productToSubmit);
+    
     useEffect(() => {
-        axios.get('http://localhost:3001/api/categories?parentCategory=null')
-            .then(response => setCategories(response.data))
+        // Fetch top-level categories
+        axios.get('http://localhost:3001/api/categories')
+            .then(response => {
+                setCategories(response.data);
+            })
             .catch(error => console.error('Error fetching categories:', error));
     }, []);
 
     useEffect(() => {
         if (selectedCategory) {
-            axios.get(`http://localhost:3001/api/categories?parentCategory=${selectedCategory._id}`)
-                .then(response => setSubCategories(response.data))
-                .catch(error => console.error('Error fetching subcategories:', error));
+            fetchSubCategories(selectedCategory._id);
+            setSubSubCategories([]); // Clear sub-subcategories when main category changes
+            setSelectedSubSubCategories([]); // Clear selected sub-subcategories
         } else {
             setSubCategories([]);
             setSelectedSubCategory(null);
+            setSubSubCategories([]);
+            setSelectedSubSubCategories([]);
         }
     }, [selectedCategory]);
 
     useEffect(() => {
         if (selectedSubCategory) {
-            axios.get(`http://localhost:3001/api/categories?parentCategory=${selectedSubCategory._id}`)
-                .then(response => setSubSubCategories(response.data))
-                .catch(error => console.error('Error fetching sub-subcategories:', error));
+            // Fetch sub-subcategories based on selected subcategory
+            fetchSubSubCategories(selectedSubCategory._id);
         } else {
             setSubSubCategories([]);
             setSelectedSubSubCategories([]);
         }
     }, [selectedSubCategory]);
+
+    // Function to fetch subcategories
+    const fetchSubCategories = (parentId) => {
+        axios.get(`http://localhost:3001/api/categories/${parentId}/subcategories`)
+            .then(response => {
+                setSubCategories(response.data);
+            })
+            .catch(error => console.error('Error fetching subcategories:', error));
+    };
+
+    // Function to fetch sub-subcategories
+    const fetchSubSubCategories = (parentId) => {
+        axios.get(`http://localhost:3001/api/categories/${parentId}/subcategories`)
+            .then(response => {
+                setSubSubCategories(response.data);
+            })
+            .catch(error => console.error('Error fetching sub-subcategories:', error));
+    };
+
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
@@ -57,7 +88,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
         const formData = new FormData();
         formData.append('image', event.target.files[0]);
     
-        axios.post('http://localhost:3001/api/upload', formData)
+        axios.post('http://localhost:3001/api/products/upload', formData)
             .then(res => {
                 const { imagePath } = res.data;
                 console.log('Image uploaded successfully:', imagePath)
@@ -97,7 +128,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
                     <Dropdown id="subCategory" value={selectedSubCategory} options={subCategories} onChange={(e) => setSelectedSubCategory(e.value)} optionLabel="name" placeholder="Select a SubCategory" />
                 </div>
             )}
-            {selectedSubCategory && (
+            {selectedSubCategory && subSubCategories.length > 0 && (
                 <div className="field">
                     <label htmlFor="subSubCategories">Sub-SubCategories</label>
                     <MultiSelect id="subSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={(e) => setSelectedSubSubCategories(e.value)} optionLabel="name" placeholder="Select Sub-SubCategories" />

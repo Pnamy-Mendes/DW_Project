@@ -6,8 +6,20 @@ import { Tag } from 'primereact/tag';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 
-const ProductTable = ({ products, onEdit, onDelete, globalFilter, setGlobalFilter, selection, onSelectionChange }) => {
+const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, setGlobalFilter, selection, onSelectionChange, categoriesMapping }) => {
 
+
+    const categoryNameBodyTemplate = (rowData) => {
+        const categoryNames = rowData.subSubCategories.map(id => getCategoryNameById(id)).join(", ");
+        return <span>{categoryNames}</span>;
+    };
+
+    const getCategoryNameById = (id) => {
+        const category = categories.find(cat => cat._id === id);
+        return category ? category.name : 'Unknown Category';
+    };
+
+    
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
     };
@@ -89,7 +101,7 @@ const ProductTable = ({ products, onEdit, onDelete, globalFilter, setGlobalFilte
             <Column field="name" header="Name" sortable></Column>
             <Column header="Image" body={imageBodyTemplate}></Column>
             <Column field="price" header="Price" body={priceBodyTemplate} sortable></Column>
-            <Column field="category" header="Category" sortable></Column>
+            <Column field="subSubCategories" header="Categories" body={categoryNameBodyTemplate} />;
             <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable></Column>
             <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable></Column>
             <Column body={actionBodyTemplate}></Column>

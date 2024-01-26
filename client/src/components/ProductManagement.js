@@ -5,7 +5,6 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar'; 
 
-
 import ProductTable from './ProductTable';
 import ProductForm from './ProductForm';
 
@@ -24,11 +23,42 @@ export default function ProductManagement() {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [productToDelete, setProductToDelete] = useState(null);
+    const [categoriesMapping, setCategoriesMapping] = useState({});
+    const [categories, setCategories] = useState([]);
+        
 
     useEffect(() => {
-        axios.get('http://localhost:3001/api/products')
-            .then(response => setProducts(response.data))
-            .catch(error => console.error('Error fetching products:', error));
+        const fetchInitialData = async () => {
+            try {
+                const [categoriesResponse, productsResponse] = await Promise.all([
+                    axios.get('http://localhost:3001/api/categories'),
+                    axios.get('http://localhost:3001/api/products')
+                ]);
+
+                setProducts(productsResponse.data);
+
+                // This part assumes categories are needed for some dropdown or listing in ProductForm
+                // Adjust as needed based on your actual requirements
+                const categoriesMapping = categoriesResponse.data.reduce((acc, cat) => {
+                    acc[cat._id] = cat.name;
+                    return acc;
+                }, {});
+                // If categoriesMapping is not used, you can remove the above code
+
+            } catch (error) {
+                console.error('Error fetching initial data:', error);
+            }
+        };
+
+        fetchInitialData();
+    }, []);
+
+    useEffect(() => {
+        axios.get('http://localhost:3001/api/categories')
+            .then(response => {
+                setCategories(response.data);
+            })
+            .catch(error => console.error('Error fetching categories:', error));
     }, []);
 
     const openNew = () => {
@@ -187,6 +217,8 @@ export default function ProductManagement() {
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     globalFilter={globalFilter}
                     setGlobalFilter={setGlobalFilter}
+                    categories={categories}
+
                 />
             </div>
             <Dialog 
@@ -198,7 +230,7 @@ export default function ProductManagement() {
                 onHide={() => setDeleteProductDialog(false)}>
                     
 
-                <p>Are you sure you want to delete {productToDelete && productToDelete.map(p => p.name).join(", ")}?</p>
+                <p>Are you sure you want to delete <b>{productToDelete && productToDelete.map(p => p.name).join(", ")}</b>?</p>
             </Dialog>
 
             <Dialog 
