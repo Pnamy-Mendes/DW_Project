@@ -4,8 +4,9 @@ import { Column } from 'primereact/column';
 import { Rating } from 'primereact/rating';
 import { Tag } from 'primereact/tag';
 import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 
-const ProductTable = ({ products, onEdit, onDelete }) => {
+const ProductTable = ({ products, onEdit, onDelete, globalFilter, setGlobalFilter, selection, onSelectionChange }) => {
 
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
@@ -25,6 +26,10 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
                 }}
             />
         );
+    };
+
+    const confirmDeleteProduct = (product) => {
+        confirmDeleteProduct(product);
     };
 
     const priceBodyTemplate = (rowData) => {
@@ -61,12 +66,25 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
         }
     };
 
-    return (
-        <DataTable value={products} responsiveLayout="scroll"
-            dataKey="id"  paginator rows={5} rowsPerPageOptions={[5, 10, 25]}
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products">
+    const header = (
+        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+            <h4 className="m-0">Manage Products</h4>
+            <span className="p-input-icon-left">
+                <i className="pi pi-search" />
+                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+            </span>
+        </div>
+    );
 
+    return (
+        <DataTable value={products}  globalFilter={globalFilter} 
+            responsiveLayout="scroll" selection={selection} onSelectionChange={onSelectionChange}
+            dataKey="_id"  
+            paginator rows={5} rowsPerPageOptions={[5, 10, 25]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" header={header}>
+
+            <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
             <Column field="code" header="Code" sortable></Column>
             <Column field="name" header="Name" sortable></Column>
             <Column header="Image" body={imageBodyTemplate}></Column>

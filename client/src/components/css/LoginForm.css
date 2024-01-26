@@ -1,4 +1,4 @@
-body, html {
+body.login, html.login, body.register, html.register {
     height: 100%;
     margin: 0;
     display: flex;
@@ -57,13 +57,14 @@ body, html {
     gap: 10px;
 }
 
-input[type="text"], input[type="email"], input[type="password"] {
+input.login[type="text"], input.login[type="email"], input.login[type="password"], 
+input.register[type="text"], input.register[type="email"], input.register[type="password"]  {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
 }
 
-button {
+button.login, button.register {
     background-color: #007bff;
     color: white;
     padding: 10px;
@@ -72,7 +73,7 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+button.login:hover, button.register:hover {
     background-color: #0056b3;
 }
 

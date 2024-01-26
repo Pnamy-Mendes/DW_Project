@@ -1,8 +1,8 @@
-html {
+.product {
     font-size: 14px;
 }
 
-body {
+body.product {
     font-family: var(--font-family);
     font-weight: normal; 
     color: var(--text-color);
@@ -22,4 +22,34 @@ body {
     display: block;
     margin: 0 auto; 
     border-radius: 5px; 
+}
+
+.p-button.p-button-danger, .p-buttonset.p-button-danger > .p-button, .p-splitbutton.p-button-danger > .p-button, .p-fileupload-choose.p-button-danger {
+    color: #ef4444;
+    background: none; 
+    border: 1px solid #ef4444;
+    border-radius: 50px;
+}
+
+.p-button.p-button-danger:hover, .p-buttonset.p-button-danger > .p-button:hover, .p-splitbutton.p-button-danger > .p-button:hover, .p-fileupload-choose.p-button-danger:hover {
+    color: #fff;
+    background: #ef4444;
+    border: 1px solid #ef4444;
+    
+}
+
+.mr-2 {
+    color: #6366f1;
+    background: none;
+    border: 1px solid #6366f1;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 50px;
+}
+
+.mr-2:hover {
+    color: #fff;
+    background: #6366f1;
+    border: 1px solid #6366f1;
 }

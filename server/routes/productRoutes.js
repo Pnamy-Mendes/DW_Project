@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const Product = require('../models/Product'); // Ensure the path is correct
+const Category = require('../models/Category'); // Ensure the path is correct   
 
 const router = express.Router();
 
@@ -93,5 +94,18 @@ router.delete('/:productId', async (req, res) => {
     }
 });
 
+router.post('/apply-promotion', async (req, res) => {
+    try {
+      const { productIds, promotion } = req.body;
+      const updatedProducts = await Product.updateMany(
+        { _id: { $in: productIds } },
+        { $set: { promotion: promotion } },
+        { new: true }
+      );
+      res.json(updatedProducts);
+    } catch (err) {
+      res.status(500).json({ message: 'Error applying promotion', error: err.message });
+    }
+});
 
 module.exports = router;
