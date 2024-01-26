@@ -1,4 +1,7 @@
 @echo off
+:: Set a unique title to this batch script's window
+title DW_Project_Script_Window
+
 :: BatchGotAdmin
 :-------------------------------------
 REM  --> Check for permissions
@@ -27,12 +30,18 @@ if '%errorlevel%' NEQ '0' (
     CD /D "%~dp0"
 :--------------------------------------
 
+REM Killing existing tasks except this script
+taskkill /FI "WINDOWTITLE eq Administrator: MongoDB Server*" /T /F
+taskkill /FI "WINDOWTITLE eq Selecionar npm start*" /T /F
+taskkill /FI "WINDOWTITLE eq Selecionar Administrator: Windows PowerShell*" /T /F
+taskkill /FI "WINDOWTITLE eq npm start*" /T /F
+taskkill /FI "WINDOWTITLE eq Administrator: Windows PowerShell*" /T /F
+
+
+
 REM Your original script starts here
-
-start "MongoDB" cmd /k "echo Starting MongoDB... && net start MongoDB"
-
-start "Express Server" cmd /k "cd server && echo Starting Express Server... && npm start"
-
-start "React Client" cmd /k "cd client && echo Starting React Client... && npm start"
+start "MongoDB Server" cmd /k "echo Starting MongoDB... && net start MongoDB"
+start "Express Backend" cmd /k "cd server && echo Starting Express Server... && npm start"
+start "React Frontend" cmd /k "cd client && echo Starting React Client... && npm start"
 
 echo All services are starting...

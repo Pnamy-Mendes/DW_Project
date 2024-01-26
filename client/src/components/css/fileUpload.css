@@ -1,0 +1,22 @@
+.uploaded-files-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.uploaded-file {
+    position: relative;
+    display: inline-block;
+}
+
+.uploaded-file .delete-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: none;
+}
+
+.uploaded-file:hover .delete-button {
+    display: block;
+}

@@ -1,116 +1,121 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import ProductList from './ProductList';
+import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+
+import ProductTable from './ProductTable';
 import ProductForm from './ProductForm';
 
-function ProductManagement() {
+import 'primeicons/primeicons.css';  
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
+import './css/flag.css'; 
+import './css/ProductManagement.css'
+
+export default function ProductManagement() {
     const [products, setProducts] = useState([]);
-    const [editingProduct, setEditingProduct] = useState(null);
-    const [filter, setFilter] = useState({ category: '', minPrice: '', maxPrice: '' });
-    const [sortConfig, setSortConfig] = useState({ field: null, direction: null });
+    const [productDialog, setProductDialog] = useState(false);
+    const [product, setProduct] = useState(null);
+    const toast = useRef(null);
 
     useEffect(() => {
-        fetchProducts(filter); // Fetch products whenever filter changes
-    }, [filter]); // Add filter as a dependency
+        axios.get('http://localhost:3001/api/products')
+            .then(response => setProducts(response.data))
+            .catch(error => console.error('Error fetching products:', error));
+    }, []);
 
-    const handleFilterChange = (e) => {
-        setFilter({ ...filter, [e.target.name]: e.target.value });
+    const openNew = () => {
+        setProduct({ id: null, name: '', image: null, description: '', category: null, price: 0, quantity: 0, rating: 0, inventoryStatus: 'INSTOCK' });
+        setProductDialog(true);
     };
 
-    const handleSort = (field) => {
-        let direction = 'asc';
-        if (sortConfig.field === field && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ field, direction });
+    const hideDialog = () => {
+        setProductDialog(false);
+    };
 
-        const sortedProducts = [...products].sort((a, b) => {
-            if (direction === 'asc') {
-                return a[field] > b[field] ? 1 : -1;
+    const saveProduct = () => {
+        if (product.name.trim()) {
+            if (product._id) {
+                // Update existing product
+                axios.put(`http://localhost:3001/api/products/${product._id}`, product)
+                    .then(response => {
+                        // Replace the updated product in the state
+                        const updatedProducts = products.map(p => p._id === product._id ? { ...response.data } : p);
+                        setProducts(updatedProducts);
+                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+                    })
+                    .catch(error => {
+                        console.error('Error updating product:', error);
+                        // Optionally, show an error toast message
+                    });
             } else {
-                return a[field] < b[field] ? 1 : -1;
+                // Create new product
+                axios.post('http://localhost:3001/api/products', product)
+                    .then(response => {
+                        // Add the new product to the state
+                        setProducts([...products, response.data]);
+                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+                    })
+                    .catch(error => {
+                        console.error('Error creating product:', error);
+                        // Optionally, show an error toast message
+                    });
             }
-        });
-
-        setProducts(sortedProducts);
-    };
-
-
-
-    const applyFilter = () => {
-        fetchProducts(filter);
-    };
-
-    const fetchProducts = async (filterCriteria) => {
-        try {
-            const queryParams = new URLSearchParams(filterCriteria).toString();
-            const response = await axios.get(`http://localhost:3001/api/products?${queryParams}`);
-            setProducts(response.data);
-        } catch (error) {
-            console.error('Error fetching products:', error);
+            setProductDialog(false);
         }
-    };
-
-    const handleEdit = (product) => {
-        setEditingProduct(product); // Set the currently editing product
     };
     
 
-    const handleDelete = async (productId) => {
-        try {
-            await axios.delete(`http://localhost:3001/api/products/${productId}`);
-            fetchProducts(); // Refresh the product list
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            // Handle deletion errors
-        }
+    const editProduct = (product) => {
+        setProduct({ ...product });
+        setProductDialog(true);
     };
 
-    const handleSubmit = async (productData) => {
-        try {
-            if (editingProduct) {
-                // Update existing product
-                await axios.put(`http://localhost:3001/api/products/${editingProduct._id}`, productData);
-            } else {
-                // Add a new product
-                await axios.post('http://localhost:3001/api/products', productData);
-            }
-            setEditingProduct(null); // Reset editing product
-            fetchProducts(); // Refresh the product list
-        } catch (error) {
-            console.error('Error submitting product:', error);
-            // Handle submission errors
-        }
+    const deleteProduct = (product) => {
+        axios.delete(`http://localhost:3001/api/products/${product._id}`)
+            .then(() => {
+                // Update the products state to remove the deleted product
+                const updatedProducts = products.filter(p => p._id !== product._id);
+                setProducts(updatedProducts);
+
+                // Display success message
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+            })
+            .catch(error => {
+                // Handle any errors here
+                console.error('Error deleting product:', error);
+                // Optionally, show an error toast message
+            });
     };
+
+    const onUpload = (e) => {
+        const formData = new FormData();
+        formData.append('image', e.files[0]);
+        axios.post('http://localhost:3001/api/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            const imageUrl = response.data.path;
+            setProduct({ ...product, image: imageUrl });
+        })
+        .catch(error => console.error('Error uploading file:', error));
+    };
+
     
 
     return (
-            <div className="product-management">
-             <input
-                type="text"
-                name="category"
-                value={filter.category}
-                onChange={handleFilterChange}
-                placeholder="Category"
-            />
-            <input
-                type="number"
-                name="minPrice"
-                value={filter.minPrice}
-                onChange={handleFilterChange}
-                placeholder="Min Price"
-            />
-            <input
-                type="number"
-                name="maxPrice"
-                value={filter.maxPrice}
-                onChange={handleFilterChange}
-                placeholder="Max Price"
-            />
-            <ProductForm onSubmit={handleSubmit} initialData={editingProduct} />
-            <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} onSort={handleSort} sortConfig={sortConfig} />
+        <div>
+            <Toast ref={toast} />
+            <div className="card">
+                <Button label="New Product" icon="pi pi-plus" onClick={openNew} className="mb-3" />
+                <ProductTable products={products} onEdit={editProduct} onDelete={deleteProduct} />
+            </div>
+            <Dialog visible={productDialog} style={{ width: '450px' }} header="Product Details" modal onHide={hideDialog}>
+                <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />
+            </Dialog>
         </div>
     );
 }
-
-export default ProductManagement;

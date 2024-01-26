@@ -1,38 +1,64 @@
 const express = require('express');
-const Product = require('../models/Product'); // Adjust path as needed
+const multer = require('multer');
+const path = require('path');
+const Product = require('../models/Product'); // Ensure the path is correct
+
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads'); // Save files in 'uploads' directory
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to the file name
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Route to handle file upload
+router.post('/upload', upload.single('image'), (req, res) => {
+    if (req.file) {
+        res.json({ imagePath: `/uploads/${req.file.filename}` });
+    } else {
+        res.status(400).send('No file uploaded.');
+    }
+});
+
+
+// Get all products
+router.get('/', async (req, res) => {
+    try {
+        const products = await Product.find();
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching products', error: err.message });
+    }
+});
+
+// Get a single product by id
+router.get('/:productId', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        res.json(product);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching product', error: err.message });
+    }
+});
 
 
 // Create a new product
 router.post('/', async (req, res) => {
+    const product = new Product(req.body);
     try {
-        const newProduct = new Product(req.body);
-        await newProduct.save();
+        const newProduct = await product.save();
         res.status(201).json(newProduct);
-    } catch (error) {
-        res.status(400).json({ message: 'Error creating product', error: error });
-    }
-});
-
-// GET all products
-router.get('/', async (req, res) => {
-    try {
-        let query = {};
-
-        if (req.query.category) {
-            query.category = req.query.category;
-        }
-        if (req.query.minPrice) {
-            query.price = { $gte: req.query.minPrice };
-        }
-        if (req.query.maxPrice) {
-            query.price = { ...query.price, $lte: req.query.maxPrice };
-        }
-
-        const products = await Product.find(query);
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error });
+    } catch (err) {
+        res.status(400).json({ message: 'Error creating product', error: err.message });
     }
 });
 
@@ -47,9 +73,9 @@ router.put('/:productId', async (req, res) => {
         if (!updatedProduct) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        res.status(200).json(updatedProduct);
-    } catch (error) {
-        res.status(400).json({ message: 'Error updating product', error });
+        res.json(updatedProduct);
+    } catch (err) {
+        res.status(400).json({ message: 'Error updating product', error: err.message });
     }
 });
 
@@ -62,35 +88,10 @@ router.delete('/:productId', async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
         res.status(200).json({ message: 'Product deleted' });
-    } catch (error) {
-        res.status(400).json({ message: 'Error deleting product', error });
+    } catch (err) {
+        res.status(400).json({ message: 'Error deleting product', error: err.message });
     }
 });
 
-
-// Get all products with optional filters
-router.get('/products', async (req, res) => {
-    try {
-        const query = {};
-        if (req.query.category) {
-            query.category = req.query.category;
-        }
-        // Add other filters as needed
-
-        let products = Product.find(query);
-
-        // Sorting
-        if (req.query.sortBy) {
-            const sortParam = {}; // e.g., { price: 'asc' }
-            sortParam[req.query.sortBy] = req.query.sortOrder || 'asc';
-            products = products.sort(sortParam);
-        }
-
-        const results = await products;
-        res.json(results);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
 
 module.exports = router;
