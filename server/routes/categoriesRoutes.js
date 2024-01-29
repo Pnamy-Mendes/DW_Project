@@ -1,8 +1,7 @@
 // categoriesRoute.js
 const mongoose = require('mongoose');
 const express = require('express');
-const { checkPermission } = require('./authMiddleware');
-checkPermission('admin')
+/* const { checkPermission } = require('./authMiddleware'); */
 
 const router = express.Router();
 
