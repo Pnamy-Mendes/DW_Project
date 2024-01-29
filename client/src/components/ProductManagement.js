@@ -7,6 +7,7 @@ import { Toolbar } from 'primereact/toolbar';
 
 import ProductTable from './ProductTable';
 import ProductForm from './ProductForm';
+import CategoryForm from './CategoryForm';
 
 import 'primeicons/primeicons.css';  
 import 'primereact/resources/primereact.css';
@@ -29,6 +30,10 @@ export default function ProductManagement() {
     const [categoryDialog, setCategoryDialog] = useState(false);
     const [deleteCategoryDialog, setDeleteCategoryDialog] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [activeIndex, setActiveIndex] = useState(0); // 0 for products, 1 for categories 
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [currentPath, setCurrentPath] = useState([]);
+    const [parentCategory, setParentCategory] = useState([]);
         
 
     useEffect(() => {
@@ -90,14 +95,35 @@ export default function ProductManagement() {
     }, []); // No dependencies, fetchCategories will not change on re-renders
 
 
-    const openNewProduct = () => {
-        // Logic to open the dialog for a new product
-    };
+    /* const deleteSelectedCategory = () => {
+        axios.delete(`http://localhost:3001/api/categories/${selectedCategory._id}`)
+            .then(() => {
+                toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category deleted', life: 3000 });
+                fetchCategories();
+            })
+            .catch((error) => {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete category', life: 3000 });
+            });
+        setDeleteCategoryDialog(false);
+    }; */
 
+
+    // New functions for categories
     const openNewCategory = () => {
-        setCategoryDialog(true);
+        setSelectedCategory(null); // Reset selected category
+        // Determine parentCategoryId based on the currentPath or selected category
+        const parentCategoryId = currentPath.length > 0 ? currentPath[currentPath.length - 1]._id : null;
+        setParentCategory(parentCategoryId); // You may need to add a new state for parentCategoryId
+        setCategoryDialog(true); // Open the dialog
     };
-
+    
+    // Function to set the category to be edited and open the dialog
+    const editCategory = (category) => {
+        setSelectedCategory(category); // Set selected category
+        setCategoryDialog(true); // Open the dialog
+    };
+    
+    // Function to confirm deletion of selected categories
     const confirmDeleteSelectedCategories = () => {
         if (selectedCategories.length > 0) {
             setCategoryToDelete(selectedCategories);
@@ -107,8 +133,22 @@ export default function ProductManagement() {
         }
     };
 
+    // Function to delete selected categories
     const deleteSelectedCategories = () => {
-        // Logic to delete selected categories
+        Promise.all(categoryToDelete.map(category => {
+            console.log(`Deleting category with ID: ${category._id}`); // Add this line
+            return axios.delete(`http://localhost:3001/api/categories/${category._id}`);
+        }))
+        .then(() => {
+            fetchCategories(); // Refresh the categories to reflect changes
+            setDeleteCategoryDialog(false);
+            setCategoryToDelete(null);
+            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Categories Deleted', life: 3000 });
+        })
+        .catch(error => {
+            console.error('Error deleting categories:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete categories', life: 3000 });
+        });
     };
 
     const openNew = () => {
@@ -116,9 +156,15 @@ export default function ProductManagement() {
         setProductDialog(true);
     };
 
-    const hideDialog = () => {
+    const hideProductDialog = () => {
         setProductDialog(false);
     };
+
+    const hideCategoryDialog = () => {
+        setCategoryDialog(false);
+        setParentCategory(null); // Reset parent category
+    };
+    
 
     const confirmDeleteSelectedProducts = () => {
         if (selectedProducts.length > 0) {
@@ -134,11 +180,19 @@ export default function ProductManagement() {
         setProductToDelete([product]); // Set the single product to be deleted
         setDeleteProductDialog(true); // Show the confirmation dialog
     };
+
+    // Function to confirm deletion of a single category
+    const confirmDeleteCategory = (category) => {
+        console.log('categoryToDelete: ', category);
+        setCategoryToDelete([category]); // Update to set an array for consistency
+        setDeleteCategoryDialog(true);
+    };
     
 
     // Call this function when you want to hide the delete confirmation dialog
-    const hideDeleteProductsDialog = () => {
-        setDeleteProductDialog(false);
+    const hideDeleteProductsDialog = () => { 
+        setCategoryDialog(false);
+        setDeleteCategoryDialog(false);
     };
 
     const saveProduct = (p) => {
@@ -187,7 +241,7 @@ export default function ProductManagement() {
 
     
 
-    const deleteProduct = (product) => {
+    /* const deleteProduct = (product) => {
         axios.delete(`http://localhost:3001/api/products/${product._id}`)
             .then(() => {
                 // Update the products state to remove the deleted product
@@ -202,7 +256,7 @@ export default function ProductManagement() {
                 console.error('Error deleting product:', error);
                 // Optionally, show an error toast message
             });
-    };
+    }; */
 
     const deleteSelectedProducts = () => {
         axios.all(productToDelete.map(product => 
@@ -226,11 +280,18 @@ export default function ProductManagement() {
         </React.Fragment>
     );
 
+    const deleteCategoryDialogFooter = (
+        <React.Fragment>
+            <Button label="No" icon="pi pi-times" className="p-button-text" onClick={hideCategoryDialog} />
+            <Button label="Yes" icon="pi pi-check" className="p-button-text" onClick={deleteSelectedCategories} />
+        </React.Fragment>
+    );
+
     const leftToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelectedProducts} disabled={!selectedProducts.length} />
+                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNewItem} />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={deleteSelectedItems} disabled={!selectedProducts.length && !selectedCategories.length} />
             </React.Fragment>
         );
     };
@@ -254,9 +315,51 @@ export default function ProductManagement() {
         })
         .catch(error => console.error('Error uploading file:', error));
     };
- 
-    
 
+
+    const handleTabChange = (id) => {
+        setActiveIndex(id);
+        console.log('e: ', id);
+        // Reset selections when changing tabs
+        if (id === 0) { // Products tab
+            setSelectedCategories([]);
+        } else if (id === 1) { // Categories tab
+            setSelectedProducts([]);
+        }
+    };
+    
+    const openNewItem = () => {
+        console.log('activeIndex: ', activeIndex);
+        if (activeIndex === 0) { // Products tab
+            openNew();
+        } else if (activeIndex === 1) { // Categories tab
+            openNewCategory();
+        }
+    };
+    
+    const deleteSelectedItems = () => {
+        if (activeIndex === 0) { // Products tab
+            confirmDeleteSelectedProducts();
+        } else if (activeIndex === 1) { // Categories tab
+            confirmDeleteSelectedCategories();
+        }
+    };
+
+    const saveCategory = (categoryData) => {
+        const dataToSend = selectedCategory && selectedCategory._id ? categoryData : {...categoryData, parentCategory};
+        const callback = dataToSend._id ? axios.put : axios.post;
+        const url = dataToSend._id ? `http://localhost:3001/api/categories/${dataToSend._id}` : 'http://localhost:3001/api/categories';
+        
+        callback(url, dataToSend).then(() => {
+            fetchCategories(); // Refresh the categories to reflect changes
+            setCategoryDialog(false);
+            toast.current.show({ severity: 'success', summary: 'Success', detail: `Category ${dataToSend._id ? 'updated' : 'created'}`, life: 3000 });
+        }).catch(error => {
+            console.error('Error saving category:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to save category', life: 3000 });
+        });
+    };
+ 
 
     return (
         <div>
@@ -274,9 +377,23 @@ export default function ProductManagement() {
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     globalFilter={globalFilter}
                     setGlobalFilter={setGlobalFilter} 
+
                     categoriesMapping={categoriesMapping} 
                     fetchCategories={fetchCategories}
-                    setCategories={setCategories}
+                    setCategories={setCategories}  
+                    handleonTabChange={handleTabChange}
+                    openNewItem={openNewItem}
+                    deleteSelectedItems={deleteSelectedItems}
+                    activeIndex={activeIndex}
+                    onEditCategory={editCategory}
+                    onDeleteCategory={confirmDeleteCategory}
+                    confirmDeleteCategory={confirmDeleteCategory}
+                    onSelectionChangeCategory={(e) => setSelectedCategories(e.value)}
+                    selectionCategory={selectedCategories}
+                    currentPath={currentPath}
+                    setCurrentPath={setCurrentPath}
+                    setParentCategory={setParentCategory}
+
                 />
             </div>
             <Dialog 
@@ -296,10 +413,30 @@ export default function ProductManagement() {
                 style={{ width: '450px' }} 
                 header="Product Details" 
                 modal 
-                onHide={hideDialog}>
+                onHide={hideProductDialog}>
 
-                {product && <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />}
+                {product && <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideProductDialog} onUpload={onUpload} />}
             
+            </Dialog>
+
+            <Dialog visible={categoryDialog} onHide={() => setCategoryDialog(false)}>
+                <CategoryForm
+                    category={selectedCategory}
+                    onSubmit={saveCategory}
+                    onHide={() => setCategoryDialog(false)}
+                    parentCategory={parentCategory} // Pass the parent category ID here
+                    currentPath={currentPath}
+                />
+            </Dialog>
+            <Dialog visible={deleteCategoryDialog} 
+                onHide={() => setDeleteCategoryDialog(false)}
+                style={{ width: '450px' }} 
+                footer={deleteCategoryDialogFooter}
+                header={<span>Confirm Delete <i className="pi pi-exclamation-triangle" style={{ color: 'red', fontSize: '1.5rem', padding: '10px' }} /></span>} 
+                modal
+            >
+                
+                <p>Are you sure you want to delete <b>{categoryToDelete && categoryToDelete.map(p => p.name).join(", ")}</b>?</p>
             </Dialog>
                  
         </div>

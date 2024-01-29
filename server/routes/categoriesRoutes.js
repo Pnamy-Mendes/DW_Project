@@ -1,7 +1,8 @@
 // categoriesRoute.js
 const mongoose = require('mongoose');
 const express = require('express');
-const Category = require('../models/Category'); // Ensure the path is correct
+const { checkPermission } = require('../middleware/authMiddleware');
+checkPermission('admin')
 
 const router = express.Router();
 
@@ -69,7 +70,7 @@ router.get('/:categoryId', async (req, res) => {
 });
 
 // Create a new category
-router.post('/', async (req, res) => {
+router.post('/', checkPermission('admin'), async (req, res) => {
     const category = new Category({
         name: req.body.name,
         parentCategory: req.body.parentCategory || null
@@ -84,7 +85,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update a category
-router.put('/:categoryId', async (req, res) => {
+router.put('/:categoryId', checkPermission('admin'), async (req, res) => {
     try {
         const updatedCategory = await Category.findByIdAndUpdate(
             req.params.categoryId,
@@ -100,15 +101,16 @@ router.put('/:categoryId', async (req, res) => {
     }
 });
 
-// Delete a category
-router.delete('/:categoryId', async (req, res) => {
+// Using findByIdAndDelete
+router.delete('/:categoryId', checkPermission('admin'), async (req, res) => {
     try {
-        const category = await Category.findByIdAndRemove(req.params.categoryId);
+        const category = await Category.findByIdAndDelete(req.params.categoryId);
         if (!category) {
             return res.status(404).send('Category not found');
         }
         res.send('Category deleted successfully');
     } catch (error) {
+        console.error('Error deleting category', error);
         res.status(400).send('Error deleting category');
     }
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Rating } from 'primereact/rating';
@@ -8,7 +8,11 @@ import { InputText } from 'primereact/inputtext';
 import { TabView, TabPanel } from 'primereact/tabview';
 import CategoryTable from './CategoryTable';
 
-const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, setGlobalFilter, selection, onSelectionChange, categoriesMapping, fetchCategories, setCategories}) => {
+const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, 
+    setGlobalFilter, selection, onSelectionChange, categoriesMapping, fetchCategories, 
+    setCategories, handleonTabChange, activeIndex, onEditCategory, onDeleteCategory, 
+    onDeleteSelectedCategories, hideCategoryDialog, onSelectionChangeCategory, 
+    selectionCategory, currentPath, setCurrentPath, setParentCategory}) => {
 
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
@@ -24,6 +28,11 @@ const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, se
     const ratingBodyTemplate = (rowData) => <Rating value={rowData.rating} readOnly cancel={false} />;
 
     const statusBodyTemplate = (rowData) => <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)} />;
+
+    // Function to switch between product and category management
+    const handleManagementChange = (index) => {
+        // Implementation based on the selected tab index
+    };
 
     const actionBodyTemplate = (rowData) => (
         <React.Fragment>
@@ -79,7 +88,7 @@ const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, se
 
     return (
         
-        <TabView>
+        <TabView activeIndex={activeIndex} onTabChange={(e) => (handleonTabChange(e.index))}>
             <TabPanel header="Product Details " leftIcon="pi pi-box" style={{ marginRight: '50px' }}>
                 <DataTable 
                     value={products} 
@@ -105,7 +114,20 @@ const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, se
                 </DataTable>
             </TabPanel>
             <TabPanel header=" Categories " leftIcon="pi pi-tags">
-                <CategoryTable categories={categories} setCategories={setCategories} fetchCategories={fetchCategories} />
+                <CategoryTable 
+                    categories={categories} 
+                    setCategories={setCategories}
+                    fetchCategories={fetchCategories}  
+                    onDeleteCategory={onDeleteCategory}
+                    onEditCategory={onEditCategory}
+                    deleteSelectedCategory={onDeleteSelectedCategories}
+                    hideCategoryDialog={hideCategoryDialog}
+                    onSelectionChangeCategory={onSelectionChangeCategory}
+                    selectionCategory={selectionCategory}
+                    currentPath={currentPath}
+                    setCurrentPath={setCurrentPath}
+                    setParentCategory={setParentCategory}
+                />
             </TabPanel>
         </TabView>
     );
