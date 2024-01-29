@@ -1,7 +1,7 @@
 // categoriesRoute.js
 const mongoose = require('mongoose');
 const express = require('express');
-const { checkPermission } = require('../middleware/authMiddleware');
+const { checkPermission } = require('./authMiddleware');
 checkPermission('admin')
 
 const router = express.Router();
@@ -70,7 +70,7 @@ router.get('/:categoryId', async (req, res) => {
 });
 
 // Create a new category
-router.post('/', checkPermission('admin'), async (req, res) => {
+router.post('/', async (req, res) => {
     const category = new Category({
         name: req.body.name,
         parentCategory: req.body.parentCategory || null
@@ -85,7 +85,7 @@ router.post('/', checkPermission('admin'), async (req, res) => {
 });
 
 // Update a category
-router.put('/:categoryId', checkPermission('admin'), async (req, res) => {
+router.put('/:categoryId', async (req, res) => {
     try {
         const updatedCategory = await Category.findByIdAndUpdate(
             req.params.categoryId,
@@ -102,7 +102,7 @@ router.put('/:categoryId', checkPermission('admin'), async (req, res) => {
 });
 
 // Using findByIdAndDelete
-router.delete('/:categoryId', checkPermission('admin'), async (req, res) => {
+router.delete('/:categoryId', async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.categoryId);
         if (!category) {
