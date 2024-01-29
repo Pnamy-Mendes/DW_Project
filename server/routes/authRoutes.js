@@ -1,11 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const axios = require('axios');
-const dotenv = require('dotenv'); 
+const axios = require('axios'); 
 const User = require('../models/User');
+const TypeUser = require('../models/TypeUser');
 const router = express.Router();
+const mongoose = require('mongoose');
 
-dotenv.config();
+console.log(process.env.GITHUB_CLIENT_ID);
 
 // Reusable function to set cookie
 function setUserInfoCookie(res, user) {
@@ -19,7 +20,22 @@ function setUserInfoCookie(res, user) {
 // Registration route
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, name} = req.body;
+        console.log(username, email, password, name) 
+
+        // Convert the defaultTypeUserId string to ObjectId
+        const defaultTypeUserId = new mongoose.Types.ObjectId('65b6a77f17a2772efba9193b');
+        const defaultTypeUser = await TypeUser.findById(defaultTypeUserId);
+        /* console.log(defaultTypeUserId)  */
+
+        /* const typeName = 'User'; // Replace with the desired name
+        const typeUser = await TypeUser.findOne({ name: typeName });
+        console.log(typeUser) */
+
+
+        if (!defaultTypeUser) {
+            return res.status(404).json({ message: "Default defaultTypeUser not found" });
+        }
 
         let userByUsername = await User.findOne({ lowercaseUsername: username.toLowerCase() });
         if (userByUsername) {
@@ -33,10 +49,12 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = bcrypt.hashSync(password, 12);
         const newUser = new User({
+            name,
             username,
             lowercaseUsername: username.toLowerCase(),
             email,
-            password: hashedPassword
+            password: hashedPassword, 
+            defaultTypeUser: defaultTypeUser._id
         });
         await newUser.save();
 
@@ -52,7 +70,18 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await User.findOne({ lowercaseUsername: username.toLowerCase() });
+        const user = await User.findOne({ lowercaseUsername: username.toLowerCase() }); 
+
+        console.log("User found:", user);
+        console.log("Received username:", username);
+        console.log("Received password:", password);
+        
+        // Additional debugging
+        console.log("Hashed password in the database:", user.password);
+        
+        const isPasswordMatch = bcrypt.compareSync(password, user.password);
+        console.log("Comparison result:", isPasswordMatch);
+         
 
         if (user && bcrypt.compareSync(password, user.password)) {
             setUserInfoCookie(res, user);
@@ -67,7 +96,7 @@ router.post('/login', async (req, res) => {
 });
 
 // GitHub OAuth route
-router.get('/auth/github', (req, res) => {
+router.get('/auth/github', (req, res) => {  
     const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}`;
     res.redirect(url);
 });

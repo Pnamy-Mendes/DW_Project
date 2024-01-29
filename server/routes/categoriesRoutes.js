@@ -16,6 +16,24 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get all categories with parent information
+router.get('/categories-with-parents', async (req, res) => {
+    try {
+        const categories = await Category.find().lean();
+        const categoriesWithParents = categories.map(cat => {
+            return {
+                _id: cat._id.toString(),
+                name: cat.name,
+                parentCategory: cat.parentCategory ? cat.parentCategory.toString() : null,
+            };
+        });
+        res.json(categoriesWithParents);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching categories', error: err.message });
+    }
+});
+
+
 // Get subcategories for a given category
 router.get('/:categoryId/subcategories', async (req, res) => {
     try {
@@ -85,13 +103,13 @@ router.put('/:categoryId', async (req, res) => {
 // Delete a category
 router.delete('/:categoryId', async (req, res) => {
     try {
-        const deletedCategory = await Category.findByIdAndRemove(req.params.categoryId);
-        if (!deletedCategory) {
-            return res.status(404).json({ message: 'Category not found' });
+        const category = await Category.findByIdAndRemove(req.params.categoryId);
+        if (!category) {
+            return res.status(404).send('Category not found');
         }
-        res.status(200).json({ message: 'Category deleted' });
-    } catch (err) {
-        res.status(400).json({ message: 'Error deleting category', error: err.message });
+        res.send('Category deleted successfully');
+    } catch (error) {
+        res.status(400).send('Error deleting category');
     }
 });
 

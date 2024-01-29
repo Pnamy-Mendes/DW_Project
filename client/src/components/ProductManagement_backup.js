@@ -1,110 +1,144 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios'; // Import axios for HTTP requestss
-import { classNames } from 'primereact/utils';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import { Toast } from 'primereact/toast';
-import { Button } from 'primereact/button';
-import { FileUpload } from 'primereact/fileupload';
-import { Rating } from 'primereact/rating';
-import { Toolbar } from 'primereact/toolbar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton } from 'primereact/radiobutton';
-import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { Tag } from 'primereact/tag';
- 
+import { Button } from 'primereact/button';
+import { Toolbar } from 'primereact/toolbar'; 
+
+import ProductTable from './ProductTable';
+import ProductForm from './ProductForm';
+
 import 'primeicons/primeicons.css';  
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import './css/flag.css'; 
 import './css/ProductManagement.css'
 
-export default function ProductsDemo() {
-    let emptyProduct = {
-        id: null,
-        name: '',
-        image: null,
-        description: '',
-        category: null,
-        price: 0,
-        quantity: 0,
-        rating: 0,
-        inventoryStatus: 'INSTOCK'
-    };
-
-    const [products, setProducts] = useState(null);
+export default function ProductManagement() {
+    const [products, setProducts] = useState([]);
     const [productDialog, setProductDialog] = useState(false);
-    const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-    const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
-    const [product, setProduct] = useState(emptyProduct);
-    const [selectedProducts, setSelectedProducts] = useState(null);
-    const [submitted, setSubmitted] = useState(false);
-    const [globalFilter, setGlobalFilter] = useState(null);
+    const [product, setProduct] = useState(null);
     const toast = useRef(null);
-    const dt = useRef(null);
+    const [globalFilter, setGlobalFilter] = useState(null);
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
+    const [categoriesMapping, setCategoriesMapping] = useState({});
+    const [categories, setCategories] = useState([]); 
+        
 
     useEffect(() => {
-        axios.get('http://localhost:3001/products') // Adjust the URL as needed
+        const fetchInitialData = async () => {
+            try {
+                const [categoriesResponse, productsResponse] = await Promise.all([
+                    axios.get('http://localhost:3001/api/categories/categories-with-parents'),
+                    axios.get('http://localhost:3001/api/products')
+                ]);
+    
+                setProducts(productsResponse.data);
+    
+                const categoriesMapping = categoriesResponse.data.reduce((acc, cat) => {
+                    acc[cat._id] = { name: cat.name, parentCategory: cat.parentCategory };
+                    return acc;
+                }, {});
+                
+                setCategoriesMapping(categoriesMapping);
+    
+                console.log('categoriesMapping: ', categoriesMapping);
+    
+            } catch (error) {
+                console.error('Error fetching initial data:', error);
+            }
+        };
+    
+        fetchInitialData();
+    }, []);
+     
+
+    useEffect(() => {
+        axios.get('http://localhost:3001/api/categories')
             .then(response => {
-                setProducts(response.data);
+                setCategories(response.data);
             })
-            .catch(error => {
-                console.error('There was an error fetching the products!', error);
-            });
+            .catch(error => console.error('Error fetching categories:', error));
     }, []);
 
-    const formatCurrency = (value) => {
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    };
+    const fetchCategories = useCallback(() => {
+        axios.get('http://localhost:3001/api/categories')
+            .then(response => {
+                setCategories(response.data);
+            })
+            .catch(error => console.error('Error fetching categories:', error));
+    }, []); // No dependencies, fetchCategories will not change on re-renders
+
+
+    
 
     const openNew = () => {
-        setProduct(emptyProduct);
-        setSubmitted(false);
+        setProduct({ id: null, name: '', image: null, description: '', category: null, price: 0, quantity: 0, rating: 0, inventoryStatus: 'INSTOCK' });
         setProductDialog(true);
     };
 
     const hideDialog = () => {
-        setSubmitted(false);
         setProductDialog(false);
     };
 
-    const hideDeleteProductDialog = () => {
+    const confirmDeleteSelectedProducts = () => {
+        if (selectedProducts.length > 0) {
+            setProductToDelete(selectedProducts);
+            setDeleteProductDialog(true);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'No products selected', life: 3000 });
+        }
+    };
+
+    // Update confirmDeleteProduct for individual product deletion
+    const confirmDeleteProduct = (product) => {
+        setProductToDelete([product]); // Set the single product to be deleted
+        setDeleteProductDialog(true); // Show the confirmation dialog
+    };
+    
+
+    // Call this function when you want to hide the delete confirmation dialog
+    const hideDeleteProductsDialog = () => {
         setDeleteProductDialog(false);
     };
 
-    const hideDeleteProductsDialog = () => {
-        setDeleteProductsDialog(false);
-    };
-
-    const saveProduct = () => {
-        setSubmitted(true);
-    
-        if (product.name.trim()) {
-            const _product = { ...product };
-            if (_product.id) {
-                // Update product
-                axios.put(`http://localhost:3001/api/products/${_product.id}`, _product)
+    const saveProduct = (p) => {
+        console.log('p: saveProduct', p)
+        console.log('product: saveProduct', product)
+        if (p.name.trim()) {
+            if (p._id) {
+                // Update existing product
+                axios.put(`http://localhost:3001/api/products/${product._id}`, p)
                     .then(response => {
-                        const updatedProducts = products.map(p => p.id === _product.id ? { ...response.data } : p);
+                        console.log('response.data: ', response.data);
+                        console.log('products: ', products);
+                        // Replace the updated product in the state
+                        const updatedProducts = products.map(prod => prod._id === p._id ? { ...response.data } : prod);
                         setProducts(updatedProducts);
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
                     })
-                    .catch(error => console.error('Error updating product:', error));
+                    .catch(error => {
+                        console.error('Error updating product:', error);
+                        // Optionally, show an error toast message
+                    });
             } else {
                 // Create new product
-                axios.post('http://localhost:3001/api/products', _product)
+                axios.post('http://localhost:3001/api/products', p)
                     .then(response => {
-                        setProducts([...products, response.data]);
+                        // Add the new product to the state
+                        console.log('response.data: ', response.data);
+                        console.log('products: ', products);
+                        setProducts([...products, p]);
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
                     })
-                    .catch(error => console.error('Error creating product:', error));
+                    .catch(error => {
+                        console.error('Error creating product:', error);
+                        // Optionally, show an error toast message
+                    });
             }
             setProductDialog(false);
-            setProduct(emptyProduct);
         }
     };
     
@@ -114,201 +148,40 @@ export default function ProductsDemo() {
         setProductDialog(true);
     };
 
-    const confirmDeleteProduct = (product) => {
-        setProduct(product);
-        setDeleteProductDialog(true);
-    };
+    
 
-    const deleteProduct = () => {
-        let _products = products.filter((val) => val.id !== product.id);
+    const deleteProduct = (product) => {
+        axios.delete(`http://localhost:3001/api/products/${product._id}`)
+            .then(() => {
+                // Update the products state to remove the deleted product
+                const updatedProducts = products.filter(p => p._id !== product._id);
+                setProducts(updatedProducts);
 
-        setProducts(_products);
-        setDeleteProductDialog(false);
-        setProduct(emptyProduct);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-    };
-
-    const findIndexById = (id) => {
-        let index = -1;
-
-        for (let i = 0; i < products.length; i++) {
-            if (products[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    };
-
-    const createId = () => {
-        let id = '';
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        return id;
-    };
-
-    const exportCSV = () => {
-        dt.current.exportCSV();
-    };
-
-    const confirmDeleteSelected = () => {
-        setDeleteProductsDialog(true);
+                // Display success message
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+            })
+            .catch(error => {
+                // Handle any errors here
+                console.error('Error deleting product:', error);
+                // Optionally, show an error toast message
+            });
     };
 
     const deleteSelectedProducts = () => {
-        let _products = products.filter((val) => !selectedProducts.includes(val));
-
-        setProducts(_products);
-        setDeleteProductsDialog(false);
-        setSelectedProducts(null);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+        axios.all(productToDelete.map(product => 
+            axios.delete(`http://localhost:3001/api/products/${product._id}`)
+        )).then(() => {
+            setProducts(products.filter(prod => !productToDelete.includes(prod)));
+            setSelectedProducts([]);
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+            setDeleteProductDialog(false);
+            setProductToDelete(null); // Clear the productToDelete after deletion
+        }).catch(error => {
+            console.error('Error deleting products:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'An error occurred while deleting products', life: 3000 });
+        });
     };
 
-    const onCategoryChange = (e) => {
-        let _product = { ...product };
-
-        _product['category'] = e.value;
-        setProduct(_product);
-    };
-
-    const onInputChange = (e, name) => {
-        const val = (e.target && e.target.value) || '';
-        let _product = { ...product };
-
-        _product[`${name}`] = val;
-
-        setProduct(_product);
-    };
-
-    const onInputNumberChange = (e, name) => {
-        const val = e.value || 0;
-        let _product = { ...product };
-
-        _product[`${name}`] = val;
-
-        setProduct(_product);
-    };
-
-    const leftToolbarTemplate = () => {
-        return (
-            <div className="flex flex-wrap gap-2">
-                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
-            </div>
-        );
-    };
-
-    const rightToolbarTemplate = () => {
-        return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
-    };
-
-    const imageBodyTemplate = (rowData) => {
-    return rowData.image ? 
-        <img src={rowData.image} alt={rowData.name} className="product-image" /> : 
-        <img src="/path/to/default/image" alt="Default" />;
-};
-
-    const priceBodyTemplate = (rowData) => {
-        return formatCurrency(rowData.price);
-    };
-
-    const ratingBodyTemplate = (rowData) => {
-        return <Rating value={rowData.rating} readOnly cancel={false} />;
-    };
-
-    const statusBodyTemplate = (rowData) => {
-        return <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)}></Tag>;
-    };
-
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <React.Fragment>
-                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
-                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
-            </React.Fragment>
-        );
-    };
-
-    // ... existing state variables
-
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await axios.get('http://localhost:3001/api/products');
-                setProducts(response.data);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
-    
-        fetchProducts();
-    }, []);
-
-    const onUpload = (e) => {
-        // Create FormData object
-        const formData = new FormData();
-        formData.append('image', e.files[0]);
-    
-        // Send request to your backend
-        axios.post('http://localhost:3001/api/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        .then(response => {
-            // Update product image state
-            const imageUrl = response.data.path;
-            setProduct({ ...product, image: imageUrl });
-        })
-        .catch(error => console.error('Error uploading file:', error));
-    };
-    
-
-    
-
-
-    const getSeverity = (product) => {
-        switch (product.inventoryStatus) {
-            case 'INSTOCK':
-                return 'success';
-
-            case 'LOWSTOCK':
-                return 'warning';
-
-            case 'OUTOFSTOCK':
-                return 'danger';
-
-            default:
-                return null;
-        }
-    };
-
-    const header = (
-        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Manage Products</h4>
-            <span className="p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
-            </span>
-        </div>
-    );
-    const productDialogFooter = (
-        <React.Fragment>
-            <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-            <Button label="Save" icon="pi pi-check" onClick={saveProduct} />
-        </React.Fragment>
-    );
-    const deleteProductDialogFooter = (
-        <React.Fragment>
-            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
-            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} />
-        </React.Fragment>
-    );
     const deleteProductsDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductsDialog} />
@@ -316,106 +189,82 @@ export default function ProductsDemo() {
         </React.Fragment>
     );
 
+    const leftToolbarTemplate = () => {
+        return (
+            <React.Fragment>
+                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelectedProducts} disabled={!selectedProducts.length} />
+            </React.Fragment>
+        );
+    };
+
+    const applyPromotionToSelectedProducts = () => {
+        // Logic to apply promotions
+        // Update backend and then update the state
+    };
+
+    const onUpload = (e) => {
+        const formData = new FormData();
+        formData.append('image', e.files[0]);
+        axios.post('http://localhost:3001/api/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            const imageUrl = response.data.path;
+            setProduct({ ...product, image: imageUrl });
+        })
+        .catch(error => console.error('Error uploading file:', error));
+    };
+ 
+    
+
+
     return (
         <div>
             <Toast ref={toast} />
             <div className="card">
-                <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-
-                <DataTable ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
-                        dataKey="id"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>
-                    <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="code" header="Code" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="name" header="Name" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="image" header="Image" body={imageBodyTemplate}></Column>
-                    <Column field="price" header="Price" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
-                    <Column field="category" header="Category" sortable style={{ minWidth: '10rem' }}></Column>
-                    <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
-                </DataTable>
+                <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
+                {/* <Button label="New Product" icon="pi pi-plus" onClick={openNew} className="mb-3" /> */}
+                <ProductTable 
+                    products={products} 
+                    categories={categories}
+                    onEdit={editProduct} 
+                    onDelete={confirmDeleteProduct} 
+                    confirmDeleteProduct={confirmDeleteProduct}
+                    selection={selectedProducts}  
+                    onSelectionChange={(e) => setSelectedProducts(e.value)}
+                    globalFilter={globalFilter}
+                    setGlobalFilter={setGlobalFilter} 
+                    categoriesMapping={categoriesMapping} 
+                    fetchCategories={fetchCategories}
+                    setCategories={setCategories}
+                />
             </div>
+            <Dialog 
+                visible={deleteProductDialog} 
+                style={{ width: '450px' }} 
+                header={<span>Confirm Delete <i className="pi pi-exclamation-triangle" style={{ color: 'red', fontSize: '1.5rem', padding: '10px' }} /></span>} 
+                modal 
+                footer={deleteProductsDialogFooter} 
+                onHide={() => setDeleteProductDialog(false)}>
+                    
 
-            <Dialog visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Product Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
-                {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
-                <div className="field">
-                    <label htmlFor="name" className="font-bold">
-                        Name
-                    </label>
-                    <InputText id="name" value={product.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                    {submitted && !product.name && <small className="p-error">Name is required.</small>}
-                </div>
-                <div className="field">
-                    <label htmlFor="description" className="font-bold">
-                        Description
-                    </label>
-                    <InputTextarea id="description" value={product.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} cols={20} />
-                </div>
-
-                <div className="field">
-                    <label className="mb-3 font-bold">Category</label>
-                    <div className="formgrid grid">
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={product.category === 'Accessories'} />
-                            <label htmlFor="category1">Accessories</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={product.category === 'Clothing'} />
-                            <label htmlFor="category2">Clothing</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={product.category === 'Electronics'} />
-                            <label htmlFor="category3">Electronics</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={product.category === 'Fitness'} />
-                            <label htmlFor="category4">Fitness</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="formgrid grid">
-                    <div className="field col">
-                        <label htmlFor="price" className="font-bold">
-                            Price
-                        </label>
-                        <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
-                    </div>
-                    <div className="field col">
-                        <label htmlFor="quantity" className="font-bold">
-                            Quantity
-                        </label>
-                        <InputNumber id="quantity" value={product.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
-                    </div>
-                </div>
-
-                <div className="field">
-                    <label htmlFor="image">Image</label>
-                    <FileUpload name="image" accept="image/*" maxFileSize={1000000} // 1 MB
-                        customUpload uploadHandler={onUpload} mode="basic" />
-                </div>
+                <p>Are you sure you want to delete <b>{productToDelete && productToDelete.map(p => p.name).join(", ")}</b>?</p>
             </Dialog>
 
-            <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
-                <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {product && (
-                        <span>
-                            Are you sure you want to delete <b>{product.name}</b>?
-                        </span>
-                    )}
-                </div>
-            </Dialog>
+            <Dialog 
+                visible={productDialog} 
+                style={{ width: '450px' }} 
+                header="Product Details" 
+                modal 
+                onHide={hideDialog}>
 
-            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
-                <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {product && <span>Are you sure you want to delete the selected products?</span>}
-                </div>
+                {product && <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />}
+            
             </Dialog>
+                 
         </div>
     );
 }
-        

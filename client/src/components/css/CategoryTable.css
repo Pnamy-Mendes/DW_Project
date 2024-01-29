@@ -1,0 +1,10 @@
+.custom-manage-button {
+    background-color: none !important; /* This is the default green color used by Bootstrap's .btn-success class */
+    border-color: rgba(1, 173, 24, 0.6) !important;
+    color: rgba(1, 173, 24, 0.6) !important;
+}
+
+.custom-manage-button:enabled:hover {
+    background-color: rgba(1, 173, 24, 0.6) !important;
+    color: white !important;
+}

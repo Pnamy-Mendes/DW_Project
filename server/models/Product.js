@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     subSubCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }], // Reference to sub-subcategories
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    rating: { type: Number },
+    /* rating: { type: Number }, */
     inventoryStatus: { type: String }
 });
 

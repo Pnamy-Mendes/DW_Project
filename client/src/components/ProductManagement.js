@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
@@ -24,42 +24,92 @@ export default function ProductManagement() {
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [productToDelete, setProductToDelete] = useState(null);
     const [categoriesMapping, setCategoriesMapping] = useState({});
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState([]); 
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [categoryDialog, setCategoryDialog] = useState(false);
+    const [deleteCategoryDialog, setDeleteCategoryDialog] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
         
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
+                // Fetching categories with parents and products concurrently
                 const [categoriesResponse, productsResponse] = await Promise.all([
-                    axios.get('http://localhost:3001/api/categories'),
+                    axios.get('http://localhost:3001/api/categories/categories-with-parents'),
                     axios.get('http://localhost:3001/api/products')
                 ]);
-
+    
+                // Setting products state
                 setProducts(productsResponse.data);
-
-                // This part assumes categories are needed for some dropdown or listing in ProductForm
-                // Adjust as needed based on your actual requirements
+    
+                // Creating a mapping for categories
                 const categoriesMapping = categoriesResponse.data.reduce((acc, cat) => {
-                    acc[cat._id] = cat.name;
+                    acc[cat._id] = { name: cat.name, parentCategory: cat.parentCategory };
                     return acc;
                 }, {});
-                // If categoriesMapping is not used, you can remove the above code
-
+                
+                setCategoriesMapping(categoriesMapping);
+    
+                console.log('Categories Mapping: ', categoriesMapping);
+    
             } catch (error) {
                 console.error('Error fetching initial data:', error);
             }
         };
-
+    
+        // Call fetchInitialData to load initial products and categories mapping
         fetchInitialData();
     }, []);
-
+    
     useEffect(() => {
+        // This useEffect is specifically for fetching all categories
+        // It might be used elsewhere in the component or for other purposes like populating a dropdown, etc.
+        const fetchAllCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/api/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+    
+        // Call fetchAllCategories to load all categories
+        fetchAllCategories();
+    }, []);
+    
+    const fetchCategories = useCallback(() => {
+        // This function is defined for potential manual refresh or other use cases where categories need to be re-fetched
         axios.get('http://localhost:3001/api/categories')
             .then(response => {
                 setCategories(response.data);
             })
-            .catch(error => console.error('Error fetching categories:', error));
-    }, []);
+            .catch(error => {
+                console.error('Error fetching categories:', error);
+            });
+    }, []); // No dependencies, fetchCategories will not change on re-renders
+
+
+    const openNewProduct = () => {
+        // Logic to open the dialog for a new product
+    };
+
+    const openNewCategory = () => {
+        setCategoryDialog(true);
+    };
+
+    const confirmDeleteSelectedCategories = () => {
+        if (selectedCategories.length > 0) {
+            setCategoryToDelete(selectedCategories);
+            setDeleteCategoryDialog(true);
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'No categories selected', life: 3000 });
+        }
+    };
+
+    const deleteSelectedCategories = () => {
+        // Logic to delete selected categories
+    };
 
     const openNew = () => {
         setProduct({ id: null, name: '', image: null, description: '', category: null, price: 0, quantity: 0, rating: 0, inventoryStatus: 'INSTOCK' });
@@ -91,14 +141,18 @@ export default function ProductManagement() {
         setDeleteProductDialog(false);
     };
 
-    const saveProduct = () => {
-        if (product.name.trim()) {
-            if (product._id) {
+    const saveProduct = (p) => {
+        console.log('p: saveProduct', p)
+        console.log('product: saveProduct', product)
+        if (p.name.trim()) {
+            if (p._id) {
                 // Update existing product
-                axios.put(`http://localhost:3001/api/products/${product._id}`, product)
+                axios.put(`http://localhost:3001/api/products/${product._id}`, p)
                     .then(response => {
+                        console.log('response.data: ', response.data);
+                        console.log('products: ', products);
                         // Replace the updated product in the state
-                        const updatedProducts = products.map(p => p._id === product._id ? { ...response.data } : p);
+                        const updatedProducts = products.map(prod => prod._id === p._id ? { ...response.data } : prod);
                         setProducts(updatedProducts);
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
                     })
@@ -108,10 +162,12 @@ export default function ProductManagement() {
                     });
             } else {
                 // Create new product
-                axios.post('http://localhost:3001/api/products', product)
+                axios.post('http://localhost:3001/api/products', p)
                     .then(response => {
                         // Add the new product to the state
-                        setProducts([...products, response.data]);
+                        console.log('response.data: ', response.data);
+                        console.log('products: ', products);
+                        setProducts([...products, p]);
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
                     })
                     .catch(error => {
@@ -210,15 +266,17 @@ export default function ProductManagement() {
                 {/* <Button label="New Product" icon="pi pi-plus" onClick={openNew} className="mb-3" /> */}
                 <ProductTable 
                     products={products} 
+                    categories={categories}
                     onEdit={editProduct} 
                     onDelete={confirmDeleteProduct} 
                     confirmDeleteProduct={confirmDeleteProduct}
                     selection={selectedProducts}  
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     globalFilter={globalFilter}
-                    setGlobalFilter={setGlobalFilter}
-                    categories={categories}
-
+                    setGlobalFilter={setGlobalFilter} 
+                    categoriesMapping={categoriesMapping} 
+                    fetchCategories={fetchCategories}
+                    setCategories={setCategories}
                 />
             </div>
             <Dialog 
@@ -240,7 +298,8 @@ export default function ProductManagement() {
                 modal 
                 onHide={hideDialog}>
 
-                <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />
+                {product && <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />}
+            
             </Dialog>
                  
         </div>

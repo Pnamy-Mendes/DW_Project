@@ -1,5 +1,6 @@
-body.login, html.login, body.register, html.register {
-    height: 100%;
+.login-page, .register-page {
+    height: 100vh;
+    width: 100%;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -15,6 +16,10 @@ body.login, html.login, body.register, html.register {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     transform: perspective(500px) rotateY(10deg); /* 3D effect */
     width: 300px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .input-field {
@@ -22,6 +27,13 @@ body.login, html.login, body.register, html.register {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ddd;
+}
+
+.input-field,
+.button {
+    width: 90%; /* Adjust the width as needed */
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .button {
@@ -32,10 +44,18 @@ body.login, html.login, body.register, html.register {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .button:hover {
     background-color: #0056b3;
+}
+
+/* This is to ensure that the GitHub button text aligns with the icon properly */
+.github-login-btn {
+    justify-content: center;
 }
 
 .link {
@@ -61,7 +81,7 @@ input.login[type="text"], input.login[type="email"], input.login[type="password"
 input.register[type="text"], input.register[type="email"], input.register[type="password"]  {
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: px;
 }
 
 button.login, button.register {

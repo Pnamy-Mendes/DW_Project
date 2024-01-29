@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const Product = require('../models/Product'); // Ensure the path is correct
 const Category = require('../models/Category'); // Ensure the path is correct   
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -33,11 +34,13 @@ router.get('/', async (req, res) => {
     try {
         // Populate subSubCategories to show their details instead of just IDs
         const products = await Product.find().populate('subSubCategories');
+        console.log(products)
         res.json(products);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching products', error: err.message });
     }
 });
+
 
 // Get a single product by ID
 router.get('/:productId', async (req, res) => {
@@ -54,7 +57,8 @@ router.get('/:productId', async (req, res) => {
 
 // Create a new product
 router.post('/', async (req, res) => {
-    const { subSubCategories, ...productData } = req.body;
+    console.log(req.body)
+    const { subSubCategories = [], ...productData } = req.body; // Provide a default value of an empty array
     const product = new Product({
         ...productData,
         subSubCategories: subSubCategories.map(id => mongoose.Types.ObjectId(id)),
@@ -72,19 +76,16 @@ router.post('/', async (req, res) => {
 
 // Update a product
 router.put('/:productId', async (req, res) => {
-    const { subSubCategories, ...productData } = req.body;
+    const { subSubCategories = [], ...productData } = req.body; // Provide a default value of an empty array
     const updateData = {
         ...productData,
-        subSubCategories: subSubCategories.map(id => mongoose.Types.ObjectId(id)),
+        subSubCategories: subSubCategories.map(id => new mongoose.Types.ObjectId(id)),
     };
 
     try {
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.productId,
-            {
-                ...productData,
-                subSubCategories: Array.isArray(subSubCategories) ? subSubCategories.map(id => mongoose.Types.ObjectId(id)) : [],
-            },
+            updateData,
             { new: true }
         ).populate('subSubCategories'); // Populate to return updated document details
 

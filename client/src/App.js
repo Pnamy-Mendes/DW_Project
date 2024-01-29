@@ -37,7 +37,7 @@ function App() {
               <Route path="/register" element={<RegisterForm showToast={showToast} />} />  
               <Route path="/logout" element={<Logout />} />
               <Route path="/file" element={<FileUpload />} />
-              <Route path="/admin/products" element={<ProductsDemo />} />
+              <Route path="/admin/products" element={<ProductsDemo />} /> 
               {/* Add more routes as needed */}
           </Routes>
       </Router>

@@ -15,71 +15,88 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     const [selectedSubCategory, setSelectedSubCategory] = useState(null);
     const [selectedSubSubCategories, setSelectedSubSubCategories] = useState([]);
 
-    const subSubCategoryIds = selectedSubSubCategories.map(subSubCat => subSubCat._id);
-    const productToSubmit = {
-        ...product,
-        subSubCategories: subSubCategoryIds,
-    };
-
-    onSubmit(productToSubmit);
-    
     useEffect(() => {
-        // Fetch top-level categories
         axios.get('http://localhost:3001/api/categories')
             .then(response => {
                 setCategories(response.data);
+                if (product) {
+                    initializeFormSelections();
+                }
             })
             .catch(error => console.error('Error fetching categories:', error));
-    }, []);
+    }, [product]);
 
-    useEffect(() => {
-        if (selectedCategory) {
-            fetchSubCategories(selectedCategory._id);
-            setSubSubCategories([]); // Clear sub-subcategories when main category changes
-            setSelectedSubSubCategories([]); // Clear selected sub-subcategories
-        } else {
-            setSubCategories([]);
-            setSelectedSubCategory(null);
-            setSubSubCategories([]);
-            setSelectedSubSubCategories([]);
+    const initializeFormSelections = () => {
+        const initialSubSubCategories = product.subSubCategories || [];
+        setSelectedSubSubCategories(initialSubSubCategories);
+
+        if (initialSubSubCategories.length > 0) {
+            const parentSubCategoryId = initialSubSubCategories[0].parentCategory;
+            fetchSubCategoryAndSet(parentSubCategoryId);
         }
-    }, [selectedCategory]);
+    };
 
-    useEffect(() => {
-        if (selectedSubCategory) {
-            // Fetch sub-subcategories based on selected subcategory
-            fetchSubSubCategories(selectedSubCategory._id);
-        } else {
-            setSubSubCategories([]);
-            setSelectedSubSubCategories([]);
-        }
-    }, [selectedSubCategory]);
+    const fetchSubCategoryAndSet = (subCategoryId) => {
+        axios.get(`http://localhost:3001/api/categories/${subCategoryId}`)
+            .then(response => {
+                const subCategory = response.data;
+                fetchCategoryAndSet(subCategory.parentCategory);
+                // After setting the parent category, fetch its subcategories
+                fetchSubCategories(subCategory.parentCategory, subCategory._id);
+            })
+            .catch(error => console.error('Error fetching subcategory:', error));
+    };
 
-    // Function to fetch subcategories
-    const fetchSubCategories = (parentId) => {
-        axios.get(`http://localhost:3001/api/categories/${parentId}/subcategories`)
+    const fetchCategoryAndSet = (categoryId) => {
+        axios.get(`http://localhost:3001/api/categories/${categoryId}`)
+            .then(response => {
+                setSelectedCategory(response.data);
+                fetchSubCategories(categoryId);
+            })
+            .catch(error => console.error('Error fetching category:', error));
+    };
+
+    const fetchSubCategories = (categoryId, subCategoryIdToSelect) => {
+        axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
             .then(response => {
                 setSubCategories(response.data);
+                // After subcategories are set, find and set the selected subcategory
+                if (subCategoryIdToSelect) {
+                    const subCategoryToSelect = response.data.find(sc => sc._id === subCategoryIdToSelect);
+                    setSelectedSubCategory(subCategoryToSelect);
+                }
             })
             .catch(error => console.error('Error fetching subcategories:', error));
     };
 
-    // Function to fetch sub-subcategories
-    const fetchSubSubCategories = (parentId) => {
-        axios.get(`http://localhost:3001/api/categories/${parentId}/subcategories`)
+    const fetchSubSubCategories = (subCategoryId) => {
+        axios.get(`http://localhost:3001/api/categories/${subCategoryId}/subcategories`)
             .then(response => {
                 setSubSubCategories(response.data);
+                // If there are sub-subcategories, pre-select them based on the product
+                if (product && product.subSubCategories) {
+                    const preSelectedSubSubCategories = response.data.filter(ssc =>
+                        product.subSubCategories.some(pssc => pssc._id === ssc._id)
+                    );
+                    setSelectedSubSubCategories(preSelectedSubSubCategories);
+                }
             })
             .catch(error => console.error('Error fetching sub-subcategories:', error));
     };
+    
+    useEffect(() => {
+        // When a subcategory is selected, fetch its sub-subcategories
+        if (selectedSubCategory) {
+            fetchSubSubCategories(selectedSubCategory._id);
+        }
+    }, [selectedSubCategory]);
 
-
-    const onInputChange = (e, name) => {
+    const handleInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         setProduct({ ...product, [name]: val });
     };
 
-    const onInputNumberChange = (e, name) => {
+    const handleInputNumberChange = (e, name) => {
         const val = e.value || 0;
         setProduct({ ...product, [name]: val });
     };
@@ -91,57 +108,75 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
         axios.post('http://localhost:3001/api/products/upload', formData)
             .then(res => {
                 const { imagePath } = res.data;
-                console.log('Image uploaded successfully:', imagePath)
                 setProduct(prevProduct => ({ ...prevProduct, imageName: imagePath }));
             })
             .catch(err => console.error('Error uploading image:', err));
     };
 
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const subSubCategoryIds = selectedSubSubCategories.map(ssc => ssc._id);
+
+        const updatedProduct = {
+            ...product,
+            subSubCategories: subSubCategoryIds,
+        };
+    
+        onSubmit(updatedProduct);
+    };
+
+
     return (
-        <div className="p-fluid">
+        <form className="p-fluid" onSubmit={handleSubmit}>
             <div className="field">
-                <label htmlFor="name">Name</label>
-                <InputText id="name" value={product.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={product.name.trim() ? '' : 'p-invalid'} />
-                {!product.name.trim() && <small className="p-error">Name is required.</small>}
-            </div>
-            <div className="field">
-                <label htmlFor="description">Description</label>
-                <InputTextarea id="description" value={product.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} />
-            </div>
-            <div className="formgrid grid">
-                <div className="field col-6">
-                    <label htmlFor="price">Price</label>
-                    <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="EUR" />
-                </div>
-                <div className="field col-6">
-                    <label htmlFor="quantity">Quantity</label>
-                    <InputNumber id="quantity" value={product.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
-                </div>
+                <label htmlFor="productName">Name</label>
+                <InputText id="productName" value={product.name || ''} onChange={(e) => handleInputChange(e, 'name')} required autoFocus />
+                {product.name && !product.name.trim() && <small className="p-error">Name is required.</small>}
             </div>
             <div className="field">
-                <label htmlFor="category">Category</label>
-                <Dropdown id="category" value={selectedCategory} options={categories} onChange={(e) => setSelectedCategory(e.value)} optionLabel="name" placeholder="Select a Category" />
+                <label htmlFor="productDescription">Description</label>
+                <InputTextarea id="productDescription" value={product.description || ''} onChange={(e) => handleInputChange(e, 'description')} required rows={3} />
             </div>
+            {/* Other fields... */}
+            <div className="field">
+                <label htmlFor="productCategory">Category</label>
+                <Dropdown id="productCategory" value={selectedCategory} options={categories} onChange={(e) => setSelectedCategory(e.value)} optionLabel="name" placeholder="Select a Category" />
+            </div>
+            
             {selectedCategory && (
                 <div className="field">
-                    <label htmlFor="subCategory">SubCategory</label>
-                    <Dropdown id="subCategory" value={selectedSubCategory} options={subCategories} onChange={(e) => setSelectedSubCategory(e.value)} optionLabel="name" placeholder="Select a SubCategory" />
+                    <label htmlFor="productSubCategory">SubCategory</label>
+                    <Dropdown id="productSubCategory" value={selectedSubCategory} options={subCategories} onChange={(e) => setSelectedSubCategory(e.value)} optionLabel="name" placeholder="Select a SubCategory" />
                 </div>
             )}
+            
             {selectedSubCategory && subSubCategories.length > 0 && (
                 <div className="field">
-                    <label htmlFor="subSubCategories">Sub-SubCategories</label>
-                    <MultiSelect id="subSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={(e) => setSelectedSubSubCategories(e.value)} optionLabel="name" placeholder="Select Sub-SubCategories" />
+                    <label htmlFor="productSubSubCategories">Sub-SubCategories</label>
+                    <MultiSelect id="productSubSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={(e) => setSelectedSubSubCategories(e.value)} optionLabel="name" placeholder="Select Sub-SubCategories" />
                 </div>
             )}
             <div className="field">
                 <label htmlFor="image">Image</label>
                 <input type="file" id="image" name="image" accept="image/*" onChange={handleImageUpload} />
             </div>
+
+            {product.imageName && (
+                <div className="field">
+                    <label>Selected Image:</label>
+                    <img
+                        src={`http://localhost:3001${product.imageName}`}
+                        alt="Product"
+                        style={{ width: '95%' }} // Set the width to 100%
+                    />
+                </div>
+            )}
+
+
             <div className="flex justify-content-end mt-3">
                 <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={onHide} />
-                <Button label="Save" icon="pi pi-check" className="p-button-text" onClick={onSubmit} />
+                <Button label="Save" icon="pi pi-check" className="p-button-text" type="submit" />
             </div>
-        </div>
+        </form>
     );
 }

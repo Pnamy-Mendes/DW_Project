@@ -27,10 +27,13 @@ function LoginForm({ showToast }) {
             navigate('/');
         }
 
-        const errorParam = searchParams.get('error');
-        if (errorParam) {
-            showToast('error', 'Error', decodeURIComponent(errorParam));
-        }
+        // Check if the user clicked on github Login so it ifnores the error handling
+        if (!isOAuthLogin) {
+            const errorParam = searchParams.get('error');
+            if (errorParam) {
+                showToast('error', 'Error', decodeURIComponent(errorParam));
+            }
+        }    
     }, [navigate, searchParams]);
 
     const handleSubmit = async (e) => {
@@ -64,47 +67,50 @@ function LoginForm({ showToast }) {
         // Redirect to your backend OAuth route
         setIsOAuthLogin(true);
         window.location.href = 'http://localhost:3001/auth/github';
+        // Bypass the error handling here if needed
     };
 
     return (
-        <div className="form-container">
-            <form onSubmit={handleSubmit} className="login-form">
-                <div className="field" style={{ marginBottom: '1rem' }}> {/* Adjust this value as needed */}
-                    <span className="p-float-label">
-                        <InputText
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className={error ? 'p-invalid' : ''}
-                        />
-                        <label htmlFor="username">Username</label>
-                    </span>
-                </div>
-                <div className="field" style={{ marginBottom: '1rem' }}> {/* Adjust this value as needed */}
-                    <span className="p-float-label">
-                        <InputText
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className={error ? 'p-invalid' : ''}
-                        />
-                        <label htmlFor="password">Password</label>
-                    </span>
-                </div>
-                {error && (
-                    <Message severity="error" text={error} />
-                )}
-                <Button type="submit" label="Login" />
-                <Button onClick={handleGitHubLogin} className="github-login-btn">
-                    <img src={GitHubMark} alt="GitHub" className="github-logo" />
-                    <img src={GitHubLogo} alt="GitHub" className="github-name-logo" />
-                    Continue with GitHub
-                </Button>
-                <div className="register-link">
-                    Don't have an account? <Link to="/register">Register here</Link>
-                </div>
-            </form>
+        <div className="login-page">
+            <div className="form-container">
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="field" style={{ marginBottom: '1rem' }}> {/* Adjust this value as needed */}
+                        <span className="p-float-label">
+                            <InputText
+                                id="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className={error ? 'p-invalid login' : 'login'}
+                            />
+                            <label htmlFor="username">Username</label>
+                        </span>
+                    </div>
+                    <div className="field" style={{ marginBottom: '1rem' }}> {/* Adjust this value as needed */}
+                        <span className="p-float-label">
+                            <InputText
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className={error ? 'p-invalid login' : 'login'}
+                            />
+                            <label htmlFor="password">Password</label>
+                        </span>
+                    </div>
+                    {error && (
+                        <Message severity="error" text={error} />
+                    )}
+                    <Button type="submit" label="Login" />
+                    <Button onClick={handleGitHubLogin} className="github-login-btn">
+                        <img src={GitHubMark} alt="GitHub" className="github-logo" />
+                        <img src={GitHubLogo} alt="GitHub" className="github-name-logo" />
+                        Continue with GitHub
+                    </Button>
+                    <div className="register-link">
+                        Don't have an account? <Link to="/register">Register here</Link>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

@@ -15,6 +15,8 @@ const corsOptions = {
     credentials: true,
 };
 
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/ecommerce', {
   useNewUrlParser: true,

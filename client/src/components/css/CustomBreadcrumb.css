@@ -1,0 +1,12 @@
+/* CustomBreadcrumb.css */
+.p-breadcrumb {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.p-breadcrumb .p-menuitem-link {
+    color: #007bff; /* Example color for the breadcrumb links */
+}
+
+/* You may need to adjust the color and other styles based on your application's theme */
