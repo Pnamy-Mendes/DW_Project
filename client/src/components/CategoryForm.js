@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import CategoryBreadcrumbs from './CategoryBreadcrumbs';
-import { BreadCrumb } from 'primereact/breadcrumb';
 
-const CategoryForm = ({ category, onSubmit, onHide, parentCategory, currentPath}) => {
+const CategoryForm = ({ category, onSubmit, onHide, parentCategory, currentPath }) => {
     const [name, setName] = useState(category && category.name ? category.name : '');
 
     useEffect(() => {
@@ -17,22 +16,36 @@ const CategoryForm = ({ category, onSubmit, onHide, parentCategory, currentPath}
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Pass parentCategoryId when submitting the form
-        onSubmit({ ...category, name, parentCategory: parentCategory });
+        // If there's no parentCategory (root level), it should be null
+        const categoryData = {
+            ...category,
+            name,
+            parentCategory: parentCategory !== undefined ? parentCategory : null
+        };
+        onSubmit(categoryData);
     };
 
-    console.log("currentPath: ", currentPath);
-
-    const breadcrumbs = currentPath.map((cat, index) => ({
+    // Ensure that the breadcrumbs are displayed as non-clickable
+    const breadcrumbs = currentPath.map(cat => ({
         label: cat.name,
         // No command function, making it non-interactive
     }));
+    console.log(breadcrumbs);
+
+    // Include the home icon to allow navigation to the root level
+    const home = {
+        icon: 'pi pi-home',
+        command: () => { /* Define what happens when you click the home icon if needed */ }
+    };
+
+    
 
     return (
         <form className="p-fluid" onSubmit={handleSubmit}>
-            <div className=''>
+            <div className='' key={JSON.stringify(currentPath)}>
                 <h4 className="mb-3">Category Location:</h4> 
-                <BreadCrumb model={breadcrumbs} />
+                {/* Pass the home prop to include the house icon */}
+                <CategoryBreadcrumbs currentPath={breadcrumbs} home={home} />
             </div>
             <div className="field">
                 <label htmlFor="name">Category Name</label>

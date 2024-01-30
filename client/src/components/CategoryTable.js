@@ -13,12 +13,12 @@ import CategoryBreadcrumbs from './CategoryBreadcrumbs';
 
 
 
-const CategoryTable = ({categories, setCategories, fetchCategories, onEditCategory, 
+const CategoryTable = ({categories, subCategories, isManagingSubcategories, setCategories, fetchCategories, fetchSubCategories, onEditCategory, 
     onDeleteCategory, deleteSelectedCategory, hideCategoryDialog, onSelectionChangeCategory, 
-    selectionCategory, currentPath, setCurrentPath, setParentCategory}) => {
+    selectionCategory, currentPath, setCurrentPath, setParentCategory, setIsManagingSubcategories}) => {
  
-    const [subCategories, setSubCategories] = useState([]);
-    const [isManagingSubcategories, setIsManagingSubcategories] = useState(false); 
+    /* const [subCategories, setSubCategories] = useState([]);
+    const [isManagingSubcategories, setIsManagingSubcategories] = useState(false);  */
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null); 
     
@@ -64,20 +64,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories, onEditCatego
             });
     };
     
-    const fetchSubCategories = (categoryId) => {
-        return new Promise((resolve, reject) => {
-            axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
-                .then(response => {
-                    setSubCategories(response.data);
-                    setIsManagingSubcategories(true);
-                    resolve();
-                })
-                .catch(error => {
-                    console.error('Failed to fetch subcategories:', error);
-                    reject(error);
-                });
-        });
-    };
+    
     
     
     const backToCategories = () => {

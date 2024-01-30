@@ -61,7 +61,7 @@ router.post('/', async (req, res) => {
     const { subSubCategories = [], ...productData } = req.body; // Provide a default value of an empty array
     const product = new Product({
         ...productData,
-        subSubCategories: subSubCategories.map(id => mongoose.Types.ObjectId(id)),
+        subSubCategories: subSubCategories.map(id => new mongoose.Types.ObjectId(id)),
     });
 
     try {

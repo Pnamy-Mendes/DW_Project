@@ -1,7 +1,7 @@
 // categoriesRoute.js
 const mongoose = require('mongoose');
 const express = require('express');
-/* const { checkPermission } = require('./authMiddleware'); */
+const Category = require('../models/Category'); // Ensure the path is correct
 
 const router = express.Router();
 

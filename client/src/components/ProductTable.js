@@ -8,11 +8,11 @@ import { InputText } from 'primereact/inputtext';
 import { TabView, TabPanel } from 'primereact/tabview';
 import CategoryTable from './CategoryTable';
 
-const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter, 
-    setGlobalFilter, selection, onSelectionChange, categoriesMapping, fetchCategories, 
+const ProductTable = ({ products, categories, subCategories, onEdit, onDelete, globalFilter, 
+    setGlobalFilter, selection, onSelectionChange, categoriesMapping, fetchCategories, fetchSubCategories,
     setCategories, handleonTabChange, activeIndex, onEditCategory, onDeleteCategory, 
     onDeleteSelectedCategories, hideCategoryDialog, onSelectionChangeCategory, 
-    selectionCategory, currentPath, setCurrentPath, setParentCategory}) => {
+    selectionCategory, currentPath, setCurrentPath, setParentCategory, isManagingSubcategories, setIsManagingSubcategories}) => {
 
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
@@ -127,6 +127,10 @@ const ProductTable = ({ products, categories, onEdit, onDelete, globalFilter,
                     currentPath={currentPath}
                     setCurrentPath={setCurrentPath}
                     setParentCategory={setParentCategory}
+                    fetchSubCategories={fetchSubCategories}
+                    subCategories={subCategories}
+                    isManagingSubcategories={isManagingSubcategories}
+                    setIsManagingSubcategories={setIsManagingSubcategories}
                 />
             </TabPanel>
         </TabView>

@@ -261,7 +261,13 @@ export default function ProductManagement() {
                 modal 
                 onHide={hideDialog}>
 
-                {product && <ProductForm product={product} setProduct={setProduct} onSubmit={saveProduct} onHide={hideDialog} onUpload={onUpload} />}
+                {product && <ProductForm 
+                                product={product} 
+                                setProduct={setProduct} 
+                                onSubmit={saveProduct} 
+                                onHide={hideDialog} 
+                                onUpload={onUpload} 
+                            />}
             
             </Dialog>
                  

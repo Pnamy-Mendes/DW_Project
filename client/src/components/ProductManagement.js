@@ -34,6 +34,8 @@ export default function ProductManagement() {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [currentPath, setCurrentPath] = useState([]);
     const [parentCategory, setParentCategory] = useState([]);
+    const [subCategories, setSubCategories] = useState([]);
+    const [isManagingSubcategories, setIsManagingSubcategories] = useState(false);
         
 
     useEffect(() => {
@@ -107,6 +109,20 @@ export default function ProductManagement() {
         setDeleteCategoryDialog(false);
     }; */
 
+    const fetchSubCategories = (categoryId) => {
+        return new Promise((resolve, reject) => {
+            axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
+                .then(response => {
+                    setSubCategories(response.data);
+                    setIsManagingSubcategories(true);
+                    resolve();
+                })
+                .catch(error => {
+                    console.error('Failed to fetch subcategories:', error);
+                    reject(error);
+                });
+        });
+    };
 
     // New functions for categories
     const openNewCategory = () => {
@@ -344,20 +360,52 @@ export default function ProductManagement() {
             confirmDeleteSelectedCategories();
         }
     };
+    
+    const fetchProducts = useCallback(() => {
+        axios.get('http://localhost:3001/api/products')
+          .then(response => {
+            setProducts(response.data);
+            toast.current.show({ severity: 'success', summary: 'Products Refreshed', detail: 'The product list has been updated.', life: 3000 });
+          })
+          .catch(error => {
+            console.error('Error fetching products:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch products', life: 3000 });
+          });
+      }, []);
+      
 
     const saveCategory = (categoryData) => {
         const dataToSend = selectedCategory && selectedCategory._id ? categoryData : {...categoryData, parentCategory};
         const callback = dataToSend._id ? axios.put : axios.post;
         const url = dataToSend._id ? `http://localhost:3001/api/categories/${dataToSend._id}` : 'http://localhost:3001/api/categories';
         
+        console.log('categoryData: ', categoryData);
+
         callback(url, dataToSend).then(() => {
             fetchCategories(); // Refresh the categories to reflect changes
+            fetchProducts();
             setCategoryDialog(false);
+            /* console.log("currentpath before saving",currentPath)
+            console.log("currentPath.length",currentPath.length)
+            console.log("currentPath[0]",currentPath[0]) */
+
+            currentPath.length === 1 ? 
+                fetchSubCategories(currentPath[0]._id) 
+            : 
+                fetchSubCategories(currentPath[1]._id) 
             toast.current.show({ severity: 'success', summary: 'Success', detail: `Category ${dataToSend._id ? 'updated' : 'created'}`, life: 3000 });
         }).catch(error => {
             console.error('Error saving category:', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to save category', life: 3000 });
         });
+        /* fetchCategories(); */
+        /* setSubCategories(fetchSubCategories(parentCategory)); */
+        
+        /* console.log("current subCategories after saving",subCategories) */
+        /* console.log("currentpath after saving",currentPath) */
+        /* setSubCategories() */
+
+        /* setCurrentPath([...currentPath, { name: categoryData.name, _id: categoryData._id }]); */
     };
  
 
@@ -393,6 +441,10 @@ export default function ProductManagement() {
                     currentPath={currentPath}
                     setCurrentPath={setCurrentPath}
                     setParentCategory={setParentCategory}
+                    subCategories={subCategories}
+                    isManagingSubcategories={isManagingSubcategories}
+                    fetchSubCategories={fetchSubCategories}
+                    setIsManagingSubcategories={setIsManagingSubcategories}
 
                 />
             </div>
