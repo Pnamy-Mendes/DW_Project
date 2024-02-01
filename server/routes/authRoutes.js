@@ -143,10 +143,10 @@ router.get('/auth/github/callback', async (req, res) => {
         await user.save();
 
         setUserInfoCookie(res, user);       
-        res.redirect('http://localhost:3000/admin/products');
+        res.redirect(`${process.env.REACT_APP_API_BASE_URL}:3000/`);
     } catch (error) {
         console.error("Error during GitHub OAuth callback: ", error);
-        res.redirect(`http://localhost:3000/login?error=${encodeURIComponent(error.message)}`);
+        res.redirect(`${process.env.REACT_APP_API_BASE_URL}:3000/login?error=${encodeURIComponent(error.message)}`);
     }
 });
 

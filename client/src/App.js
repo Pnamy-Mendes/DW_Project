@@ -19,11 +19,16 @@ import ManageUserRelated from './components/ManageUserRelated';
 function App() {
   const toast = useRef(null);
   const [config, setConfig] = useState({});
+  const isProduction = false;
+
+  const getProd = () => {
+      return isProduction ? 'http://82.154.212.23':'http://localhost'
+  }
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost';
+        const baseUrl = process.env.REACT_APP_API_BASE_URL || getProd();
         const response = await axios.get(`${baseUrl}:3001/config`);
         setConfig(response.data);
       } catch (error) {
@@ -38,7 +43,7 @@ function App() {
     if (config && config.apiUrl) {
       return config.apiUrl;
     }
-    const fallbackUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost';
+    const fallbackUrl = process.env.REACT_APP_API_BASE_URL || getProd();
     return fallbackUrl;
   };
 
