@@ -17,6 +17,7 @@ function setUserInfoCookie(res, user) {
     });
 }
 
+
 // Registration route
 router.post('/register', async (req, res) => {
     try {

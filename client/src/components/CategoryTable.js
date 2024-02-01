@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
-import axios from 'axios';
+import axios from 'axios'; 
+
 
 import './css/CategoryTable.css';
 
-import CategoryBreadcrumbs from './CategoryBreadcrumbs';
+import CategoryBreadcrumbs from './CategoryBreadcrumbs'; 
+import ConfigContext from './../contexts/ConfigContext';
 
 
 
@@ -20,8 +22,9 @@ const CategoryTable = ({categories, subCategories, isManagingSubcategories, setC
     /* const [subCategories, setSubCategories] = useState([]);
     const [isManagingSubcategories, setIsManagingSubcategories] = useState(false);  */
     const [globalFilter, setGlobalFilter] = useState(null);
-    const toast = useRef(null); 
-    
+    const toast = useRef(null);
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     const onNavigate = (index) => {
         if (index === null) {
@@ -53,7 +56,8 @@ const CategoryTable = ({categories, subCategories, isManagingSubcategories, setC
 
 
     const fetchRootCategories = () => {
-        axios.get(`http://localhost:3001/api/categories`)
+
+        axios.get(`${apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data); // Assuming this sets the top-level categories
                 setIsManagingSubcategories(false);

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Rating } from 'primereact/rating';
@@ -6,20 +6,25 @@ import { Tag } from 'primereact/tag';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { TabView, TabPanel } from 'primereact/tabview';
-import CategoryTable from './CategoryTable';
+
+import CategoryTable from './CategoryTable'; 
+import ConfigContext from './../contexts/ConfigContext';
 
 const ProductTable = ({ products, categories, subCategories, onEdit, onDelete, globalFilter, 
     setGlobalFilter, selection, onSelectionChange, categoriesMapping, fetchCategories, fetchSubCategories,
     setCategories, handleonTabChange, activeIndex, onEditCategory, onDeleteCategory, 
     onDeleteSelectedCategories, hideCategoryDialog, onSelectionChangeCategory, 
     selectionCategory, currentPath, setCurrentPath, setParentCategory, isManagingSubcategories, setIsManagingSubcategories}) => {
+ 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     const formatCurrency = (value) => {
         return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
     };
 
     const imageBodyTemplate = (rowData) => {
-        const imageUrl = `http://localhost:3001${rowData.imageName}`;
+        const imageUrl = `${apiUrl}:3001${rowData.imageName}`;
         return <img src={imageUrl} alt={rowData.name} className="product-image" style={{ maxWidth: '75px', maxHeight: '75px', objectFit: 'cover' }} />;
     };
 
@@ -130,7 +135,7 @@ const ProductTable = ({ products, categories, subCategories, onEdit, onDelete, g
                     fetchSubCategories={fetchSubCategories}
                     subCategories={subCategories}
                     isManagingSubcategories={isManagingSubcategories}
-                    setIsManagingSubcategories={setIsManagingSubcategories}
+                    setIsManagingSubcategories={setIsManagingSubcategories} 
                 />
             </TabPanel>
         </TabView>

@@ -5,14 +5,14 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
-import axios from 'axios';
+import axios from 'axios'; 
 
 import CategoryForm from './CategoryForm';
 import CategoryBreadcrumbs from './CategoryBreadcrumbs';
 
 
 
-const CategoryTable = ({categories, setCategories, fetchCategories}) => {
+const CategoryTable = ({categories, setCategories, fetchCategories, config}) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [subCategories, setSubCategories] = useState([]);
     const [isManagingSubcategories, setIsManagingSubcategories] = useState(false);
@@ -21,7 +21,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const [currentCategory, setCurrentCategory] = useState(null); // State to track the current category
     const [currentPath, setCurrentPath] = useState([]); 
-    const toast = useRef(null);
+    const toast = useRef(null); 
 
     const onNavigate = (index) => {
         const newPath = currentPath.slice(0, index + 1);
@@ -52,7 +52,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
     };
 
     const onManageSubcategories = (category) => {
-        axios.get(`http://localhost:3001/api/categories/${category._id}/subcategories`)
+        axios.get(`${config.apiUrl}:3001/api/categories/${category._id}/subcategories`)
             .then((response) => {
                 setSubCategories(response.data);
                 // Update breadcrumb path
@@ -65,7 +65,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
     };
 
     /* const fetchCategories = () => {
-        axios.get('http://localhost:3001/api/categories')
+        axios.get('${config.apiUrl}:3001/api/categories')
           .then(response => {
             setCategories(response.data);
             // Any additional logic after fetching categories
@@ -76,7 +76,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
       }; */
 
     const fetchRootCategories = () => {
-        axios.get(`http://localhost:3001/api/categories`)
+        axios.get(`${config.apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data);
                 setIsManagingSubcategories(false);
@@ -88,7 +88,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
     };
     
     const fetchSubCategories = (categoryId) => {
-        axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
+        axios.get(`${config.apiUrl}:3001/api/categories/${categoryId}/subcategories`)
             .then(response => {
                 // Assuming response.data contains subcategories
                 setSubCategories(response.data);
@@ -154,7 +154,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
         // Implement the save functionality (either create a new category or update an existing one)
         if (selectedCategory && selectedCategory._id) {
             // Update category
-            axios.put(`http://localhost:3001/api/categories/${selectedCategory._id}`, categoryData)
+            axios.put(`${config.apiUrl}:3001/api/categories/${selectedCategory._id}`, categoryData)
                 .then(() => {
                     toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category updated', life: 3000 });
                     fetchCategories();
@@ -164,7 +164,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
                 });
         } else {
             // Create new category
-            axios.post('http://localhost:3001/api/categories', categoryData)
+            axios.post('${config.apiUrl}:3001/api/categories', categoryData)
                 .then(() => {
                     toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category created', life: 3000 });
                     fetchCategories();
@@ -177,7 +177,7 @@ const CategoryTable = ({categories, setCategories, fetchCategories}) => {
     };
 
     const deleteSelectedCategory = () => {
-        axios.delete(`http://localhost:3001/api/categories/${selectedCategory._id}`)
+        axios.delete(`${config.apiUrl}:3001/api/categories/${selectedCategory._id}`)
             .then(() => {
                 toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category deleted', life: 3000 });
                 fetchCategories();

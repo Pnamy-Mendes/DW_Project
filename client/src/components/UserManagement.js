@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext} from 'react';
 import axios from 'axios';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import UserTable from './UserTable';
-import UserForm from './UserForm';
+import UserForm from './UserForm'; 
+import { ConfigContext } from './../contexts/ConfigContext';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -13,7 +14,9 @@ const UserManagement = () => {
     const [userDialog, setUserDialog] = useState(false);
     const [editingUser, setEditingUser] = useState({});
     const [deleteUserDialog, setDeleteUserDialog] = useState(false);
-    const toast = useRef(null);
+    const toast = useRef(null); 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     useEffect(() => {
         fetchUsers();
@@ -21,7 +24,7 @@ const UserManagement = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/users');
+            const response = await axios.get(`${apiUrl}:3001/api/users`);
             setUsers(response.data);
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -39,7 +42,7 @@ const UserManagement = () => {
 
     const onSaveUser = async (userData) => {
         const method = userData._id ? 'put' : 'post';
-        const url = userData._id ? `http://localhost:3001/api/users/${userData._id}` : 'http://localhost:3001/api/users';
+        const url = userData._id ? `${apiUrl}:3001/api/users/${userData._id}` : `${apiUrl}:3001/api/users`;
 
         try {
             await axios[method](url, userData);
@@ -63,14 +66,14 @@ const UserManagement = () => {
     };
 
     const deleteUser = async () => {
-        await Promise.all(selectedUsers.map(user => axios.delete(`http://localhost:3001/api/users/${user._id}`)));
+        await Promise.all(selectedUsers.map(user => axios.delete(`${apiUrl}:3001/api/users/${user._id}`)));
         setDeleteUserDialog(false);
         fetchUsers(); // Refresh users list
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'User(s) deleted successfully.', life: 3000 });
     };
 
     const deleteSelectedUsers = async () => {
-        const deletePromises = selectedUsers.map(user => axios.delete(`http://localhost:3001/api/users/${user._id}`));
+        const deletePromises = selectedUsers.map(user => axios.delete(`${apiUrl}:3001/api/users/${user._id}`));
         try {
             await Promise.all(deletePromises);
             fetchUsers(); // Refresh users list

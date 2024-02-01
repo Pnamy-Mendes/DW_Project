@@ -3,28 +3,39 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes'); // Import your authRoutes
 const productRoutes = require('./routes/productRoutes'); // Import the routes
 const categoriesRoutes = require('./routes/categoriesRoutes'); // Import the routes
 const userRoutes = require('./routes/userRoutes'); // Import the routes
 
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+console.log(process.env.REACT_APP_API_BASE_URL+':3000');
 
 const app = express();
 const corsOptions = {
-    origin: 'http://localhost:3000', // Replace with your frontend's URL
+    origin: process.env.REACT_APP_API_BASE_URL+':3000', // Replace with your frontend's URL
     credentials: true,
 };
 
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/ecommerce', {
+mongoose.connect('mongodb://192.168.1.134:27017/ecommerce', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+
+// Diogo
+/* mongoose.connect('mongodb://82.154.212.23:27017/ecommerce', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:')); */
+ 
 
 // Middleware 
 app.use(cors(corsOptions));
@@ -35,6 +46,13 @@ app.use('/api/categories', categoriesRoutes); // Use the routes
 app.use('/api/users', userRoutes); // Use the routes
 app.use(authRoutes); // Use the routes defined in authRoutes.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+app.get('/config', (req, res) => {
+  res.json({
+      apiUrl: process.env.REACT_APP_API_BASE_URL,
+  });
+});
 
 // Start the server
 const port = process.env.PORT || 3001;

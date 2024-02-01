@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,8 @@ import { Button } from 'primereact/button';
 import './css/LoginForm.css'; // Import the same CSS as the login page
 import isAuthenticated from '../utils/isAuthenticated';
 import GitHubLogo from '../media/GitHub_Logo_White.png';
-import GitHubMark from '../media/github-mark-white.png';
+import GitHubMark from '../media/github-mark-white.png'; 
+import ConfigContext from './../contexts/ConfigContext'
 
 function RegisterForm() {
     const [username, setUsername] = useState('');
@@ -19,7 +20,9 @@ function RegisterForm() {
     const [errorField, setErrorField] = useState('');
     const [isOAuthLogin, setIsOAuthLogin] = useState(false);
     const [name, setName] = useState('');
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -30,7 +33,7 @@ function RegisterForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/register', { username, email, password, name }, { withCredentials: true });
+            const response = await axios.post(`${apiUrl}:3001/register`, { username, email, password, name }, { withCredentials: true });
             navigate('/');
         } catch (error) {
             if (error.response) {
@@ -43,7 +46,7 @@ function RegisterForm() {
     const handleGitHubLogin = () => {
         // Redirect to your backend OAuth route
         setIsOAuthLogin(true);
-        window.location.href = 'http://localhost:3001/auth/github';
+        window.location.href = `${apiUrl}:3001/auth/github`;
     };
 
     return (

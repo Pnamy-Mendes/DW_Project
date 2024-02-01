@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import axios from 'axios';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from 'primereact/dropdown';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'primereact/multiselect'; 
+
+import ConfigContext from './../contexts/ConfigContext'
+
 
 export default function ProductForm({ product, setProduct, onSubmit, onHide, onUpload }) {
     const [categories, setCategories] = useState([]);
@@ -13,10 +16,12 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     const [subSubCategories, setSubSubCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSubCategory, setSelectedSubCategory] = useState(null);
-    const [selectedSubSubCategories, setSelectedSubSubCategories] = useState([]);
+    const [selectedSubSubCategories, setSelectedSubSubCategories] = useState([]); 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     useEffect(() => {
-        axios.get('http://localhost:3001/api/categories')
+        axios.get(`${apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data);
                 if (product) {
@@ -37,7 +42,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     };
 
     const fetchSubCategoryAndSet = (subCategoryId) => {
-        axios.get(`http://localhost:3001/api/categories/${subCategoryId}`)
+        axios.get(`${apiUrl}:3001/api/categories/${subCategoryId}`)
             .then(response => {
                 const subCategory = response.data;
                 fetchCategoryAndSet(subCategory.parentCategory);
@@ -48,7 +53,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     };
 
     const fetchCategoryAndSet = (categoryId) => {
-        axios.get(`http://localhost:3001/api/categories/${categoryId}`)
+        axios.get(`${apiUrl}:3001/api/categories/${categoryId}`)
             .then(response => {
                 setSelectedCategory(response.data);
                 fetchSubCategories(categoryId);
@@ -57,7 +62,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     };
 
     const fetchSubCategories = (categoryId, subCategoryIdToSelect) => {
-        axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
+        axios.get(`${apiUrl}:3001/api/categories/${categoryId}/subcategories`)
             .then(response => {
                 setSubCategories(response.data);
                 // After subcategories are set, find and set the selected subcategory
@@ -70,7 +75,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     };
 
     const fetchSubSubCategories = (subCategoryId) => {
-        axios.get(`http://localhost:3001/api/categories/${subCategoryId}/subcategories`)
+        axios.get(`${apiUrl}:3001/api/categories/${subCategoryId}/subcategories`)
             .then(response => {
                 setSubSubCategories(response.data);
                 // If there are sub-subcategories, pre-select them based on the product
@@ -105,7 +110,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
         const formData = new FormData();
         formData.append('image', event.target.files[0]);
     
-        axios.post('http://localhost:3001/api/products/upload', formData)
+        axios.post(`${apiUrl}:3001/api/products/upload`, formData)
             .then(res => {
                 const { imagePath } = res.data;
                 setProduct(prevProduct => ({ ...prevProduct, imageName: imagePath }));
@@ -165,7 +170,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
                 <div className="field">
                     <label>Selected Image:</label>
                     <img
-                        src={`http://localhost:3001${product.imageName}`}
+                        src={`${apiUrl}:3001${product.imageName}`}
                         alt="Product"
                         style={{ width: '95%' }} // Set the width to 100%
                     />

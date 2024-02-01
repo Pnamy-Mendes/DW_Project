@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import axios from 'axios';
 import Product from './Product';
+import ConfigContext from './../contexts/ConfigContext'; // Import ConfigContext
+ 
 
 function Products() {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([]); 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/products');
+                const response = await axios.get(`${apiUrl}:3001/api/products`);
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);

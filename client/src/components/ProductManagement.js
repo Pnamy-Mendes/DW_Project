@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext} from 'react';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
@@ -7,7 +7,8 @@ import { Toolbar } from 'primereact/toolbar';
 
 import ProductTable from './ProductTable';
 import ProductForm from './ProductForm';
-import CategoryForm from './CategoryForm';
+import CategoryForm from './CategoryForm'; 
+import ConfigContext from './../contexts/ConfigContext';
 
 import 'primeicons/primeicons.css';  
 import 'primereact/resources/primereact.css';
@@ -36,6 +37,9 @@ export default function ProductManagement() {
     const [parentCategory, setParentCategory] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
     const [isManagingSubcategories, setIsManagingSubcategories] = useState(false);
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
+     
         
 
     useEffect(() => {
@@ -43,8 +47,8 @@ export default function ProductManagement() {
             try {
                 // Fetching categories with parents and products concurrently
                 const [categoriesResponse, productsResponse] = await Promise.all([
-                    axios.get('http://localhost:3001/api/categories/categories-with-parents'),
-                    axios.get('http://localhost:3001/api/products')
+                    axios.get(`${apiUrl}:3001/api/categories/categories-with-parents`),
+                    axios.get(`${apiUrl}:3001/api/products`)
                 ]);
     
                 // Setting products state
@@ -74,7 +78,7 @@ export default function ProductManagement() {
         // It might be used elsewhere in the component or for other purposes like populating a dropdown, etc.
         const fetchAllCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/categories');
+                const response = await axios.get(`${apiUrl}:3001/api/categories`);
                 setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -87,7 +91,7 @@ export default function ProductManagement() {
     
     const fetchCategories = useCallback(() => {
         // This function is defined for potential manual refresh or other use cases where categories need to be re-fetched
-        axios.get('http://localhost:3001/api/categories')
+        axios.get(`${apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data);
             })
@@ -98,7 +102,7 @@ export default function ProductManagement() {
 
 
     /* const deleteSelectedCategory = () => {
-        axios.delete(`http://localhost:3001/api/categories/${selectedCategory._id}`)
+        axios.delete(`${apiUrl}:3001/api/categories/${selectedCategory._id}`)
             .then(() => {
                 toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category deleted', life: 3000 });
                 fetchCategories();
@@ -111,7 +115,7 @@ export default function ProductManagement() {
 
     const fetchSubCategories = (categoryId) => {
         return new Promise((resolve, reject) => {
-            axios.get(`http://localhost:3001/api/categories/${categoryId}/subcategories`)
+            axios.get(`${apiUrl}:3001/api/categories/${categoryId}/subcategories`)
                 .then(response => {
                     setSubCategories(response.data);
                     setIsManagingSubcategories(true);
@@ -153,7 +157,7 @@ export default function ProductManagement() {
     const deleteSelectedCategories = () => {
         Promise.all(categoryToDelete.map(category => {
             console.log(`Deleting category with ID: ${category._id}`); // Add this line
-            return axios.delete(`http://localhost:3001/api/categories/${category._id}`);
+            return axios.delete(`${apiUrl}:3001/api/categories/${category._id}`);
         }))
         .then(() => {
             fetchCategories(); // Refresh the categories to reflect changes
@@ -217,7 +221,7 @@ export default function ProductManagement() {
         if (p.name.trim()) {
             if (p._id) {
                 // Update existing product
-                axios.put(`http://localhost:3001/api/products/${product._id}`, p)
+                axios.put(`${apiUrl}:3001/api/products/${product._id}`, p)
                     .then(response => {
                         console.log('response.data: ', response.data);
                         console.log('products: ', products);
@@ -232,7 +236,7 @@ export default function ProductManagement() {
                     });
             } else {
                 // Create new product
-                axios.post('http://localhost:3001/api/products', p)
+                axios.post(`${apiUrl}:3001/api/products`, p)
                     .then(response => {
                         // Add the new product to the state
                         console.log('response.data: ', response.data);
@@ -258,7 +262,7 @@ export default function ProductManagement() {
     
 
     /* const deleteProduct = (product) => {
-        axios.delete(`http://localhost:3001/api/products/${product._id}`)
+        axios.delete(`${apiUrl}:3001/api/products/${product._id}`)
             .then(() => {
                 // Update the products state to remove the deleted product
                 const updatedProducts = products.filter(p => p._id !== product._id);
@@ -276,7 +280,7 @@ export default function ProductManagement() {
 
     const deleteSelectedProducts = () => {
         axios.all(productToDelete.map(product => 
-            axios.delete(`http://localhost:3001/api/products/${product._id}`)
+            axios.delete(`${apiUrl}:3001/api/products/${product._id}`)
         )).then(() => {
             setProducts(products.filter(prod => !productToDelete.includes(prod)));
             setSelectedProducts([]);
@@ -320,7 +324,7 @@ export default function ProductManagement() {
     const onUpload = (e) => {
         const formData = new FormData();
         formData.append('image', e.files[0]);
-        axios.post('http://localhost:3001/api/upload', formData, {
+        axios.post(`${apiUrl}:3001/api/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -362,7 +366,7 @@ export default function ProductManagement() {
     };
     
     const fetchProducts = useCallback(() => {
-        axios.get('http://localhost:3001/api/products')
+        axios.get(`${apiUrl}:3001/api/products`)
           .then(response => {
             setProducts(response.data);
             toast.current.show({ severity: 'success', summary: 'Products Refreshed', detail: 'The product list has been updated.', life: 3000 });
@@ -377,7 +381,7 @@ export default function ProductManagement() {
     const saveCategory = (categoryData) => {
         const dataToSend = selectedCategory && selectedCategory._id ? categoryData : {...categoryData, parentCategory};
         const callback = dataToSend._id ? axios.put : axios.post;
-        const url = dataToSend._id ? `http://localhost:3001/api/categories/${dataToSend._id}` : 'http://localhost:3001/api/categories';
+        const url = dataToSend._id ? `${apiUrl}:3001/api/categories/${dataToSend._id}` : `${apiUrl}:3001/api/categories`;
         
         console.log('categoryData: ', categoryData);
 
@@ -444,8 +448,7 @@ export default function ProductManagement() {
                     subCategories={subCategories}
                     isManagingSubcategories={isManagingSubcategories}
                     fetchSubCategories={fetchSubCategories}
-                    setIsManagingSubcategories={setIsManagingSubcategories}
-
+                    setIsManagingSubcategories={setIsManagingSubcategories} 
                 />
             </div>
             <Dialog 

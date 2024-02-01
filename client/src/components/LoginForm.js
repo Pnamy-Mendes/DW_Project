@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext'; 
 import { Message } from 'primereact/message';
-import { Button } from 'primereact/button';
+import { Button } from 'primereact/button'; 
 
 
 import './css/LoginForm.css';
 import isAuthenticated from '../utils/isAuthenticated';
 import GitHubLogo from '../media/GitHub_Logo_White.png';
 import GitHubMark from '../media/github-mark-white.png';
+import ConfigContext from './../contexts/ConfigContext' 
 
 
-function LoginForm({ showToast }) {
+function LoginForm({ showToast}) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isOAuthLogin, setIsOAuthLogin] = useState(false);
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -53,7 +56,7 @@ function LoginForm({ showToast }) {
             }
         }
         try {
-            const response = await axios.post('http://localhost:3001/login', { username, password }, { withCredentials: true });
+            const response = await axios.post(`${apiUrl}:3001/login`, { username, password }, { withCredentials: true });
             navigate('/');
         } catch (error) {
             if (error.response) {
@@ -66,7 +69,7 @@ function LoginForm({ showToast }) {
     const handleGitHubLogin = () => {
         // Redirect to your backend OAuth route
         setIsOAuthLogin(true);
-        window.location.href = 'http://localhost:3001/auth/github';
+        window.location.href = `${apiUrl}:3001/auth/github`;
         // Bypass the error handling here if needed
     };
 

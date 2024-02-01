@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext} from 'react';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
@@ -6,13 +6,15 @@ import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar'; 
 
 import ProductTable from './ProductTable';
-import ProductForm from './ProductForm';
+import ProductForm from './ProductForm'; 
+import ConfigContext from './../contexts/ConfigContext'
 
 import 'primeicons/primeicons.css';  
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import './css/flag.css'; 
-import './css/ProductManagement.css'
+import './css/ProductManagement.css';
+
 
 export default function ProductManagement() {
     const [products, setProducts] = useState([]);
@@ -24,15 +26,17 @@ export default function ProductManagement() {
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [productToDelete, setProductToDelete] = useState(null);
     const [categoriesMapping, setCategoriesMapping] = useState({});
-    const [categories, setCategories] = useState([]); 
+    const [categories, setCategories] = useState([]);  
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
         
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 const [categoriesResponse, productsResponse] = await Promise.all([
-                    axios.get('http://localhost:3001/api/categories/categories-with-parents'),
-                    axios.get('http://localhost:3001/api/products')
+                    axios.get(`${apiUrl}:3001/api/categories/categories-with-parents`),
+                    axios.get(`${apiUrl}:3001/api/products`)
                 ]);
     
                 setProducts(productsResponse.data);
@@ -56,7 +60,7 @@ export default function ProductManagement() {
      
 
     useEffect(() => {
-        axios.get('http://localhost:3001/api/categories')
+        axios.get(`${apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data);
             })
@@ -64,7 +68,7 @@ export default function ProductManagement() {
     }, []);
 
     const fetchCategories = useCallback(() => {
-        axios.get('http://localhost:3001/api/categories')
+        axios.get(`${apiUrl}:3001/api/categories`)
             .then(response => {
                 setCategories(response.data);
             })
@@ -110,7 +114,7 @@ export default function ProductManagement() {
         if (p.name.trim()) {
             if (p._id) {
                 // Update existing product
-                axios.put(`http://localhost:3001/api/products/${product._id}`, p)
+                axios.put(`${apiUrl}:3001/api/products/${product._id}`, p)
                     .then(response => {
                         console.log('response.data: ', response.data);
                         console.log('products: ', products);
@@ -125,7 +129,7 @@ export default function ProductManagement() {
                     });
             } else {
                 // Create new product
-                axios.post('http://localhost:3001/api/products', p)
+                axios.post(`${apiUrl}:3001/api/products`, p)
                     .then(response => {
                         // Add the new product to the state
                         console.log('response.data: ', response.data);
@@ -151,7 +155,7 @@ export default function ProductManagement() {
     
 
     const deleteProduct = (product) => {
-        axios.delete(`http://localhost:3001/api/products/${product._id}`)
+        axios.delete(`${apiUrl}:3001/api/products/${product._id}`)
             .then(() => {
                 // Update the products state to remove the deleted product
                 const updatedProducts = products.filter(p => p._id !== product._id);
@@ -169,7 +173,7 @@ export default function ProductManagement() {
 
     const deleteSelectedProducts = () => {
         axios.all(productToDelete.map(product => 
-            axios.delete(`http://localhost:3001/api/products/${product._id}`)
+            axios.delete(`${apiUrl}:3001/api/products/${product._id}`)
         )).then(() => {
             setProducts(products.filter(prod => !productToDelete.includes(prod)));
             setSelectedProducts([]);
@@ -206,7 +210,7 @@ export default function ProductManagement() {
     const onUpload = (e) => {
         const formData = new FormData();
         formData.append('image', e.files[0]);
-        axios.post('http://localhost:3001/api/upload', formData, {
+        axios.post(`${apiUrl}:3001/api/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
