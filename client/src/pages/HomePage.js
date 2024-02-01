@@ -14,7 +14,7 @@ function HomePage() {
             const apiUrl = getApiUrl(); // Use getApiUrl to get the API URL
             try {
                 const queryParams = new URLSearchParams({ ...filters, ...sort });
-                const response = await axios.get(`${apiUrl}/api/products?${queryParams}`); // Use apiUrl
+                const response = await axios.get(`${apiUrl}:3001/api/products?${queryParams}`); // Use apiUrl
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products', error);

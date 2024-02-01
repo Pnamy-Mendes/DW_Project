@@ -28,7 +28,7 @@ function App() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const baseUrl = process.env.REACT_APP_API_BASE_URL || getProd();
+        const baseUrl = isProduction ? 'http://82.154.212.23' : 'http://localhost';
         const response = await axios.get(`${baseUrl}:3001/config`);
         setConfig(response.data);
       } catch (error) {
@@ -37,15 +37,20 @@ function App() {
     };
 
     fetchConfig();
-  }, []);
+  }, [isProduction]);
 
-  const getApiUrl = () => {
+  /* const getApiUrl = () => {
     if (config && config.apiUrl) {
       return config.apiUrl;
     }
     const fallbackUrl = process.env.REACT_APP_API_BASE_URL || getProd();
     return fallbackUrl;
+  }; */
+  const getApiUrl = () => {
+    const baseUrl = isProduction ? 'http://82.154.212.23' : 'http://localhost';
+    return `${baseUrl}`; // Ensure this matches your backend server's URL and port
   };
+  
 
   const showToast = (severity, summary, detail) => {
     toast.current.show({ severity, summary, detail, life: 3000, position: 'top-right' });
@@ -55,7 +60,7 @@ function App() {
   const configValue = { ...config, getApiUrl };
 
   return (
-    <ConfigProvider value={configValue}>
+    <ConfigProvider /* value={configValue}  */value={{ getApiUrl }}>
       <Router>
         <Toast ref={toast} />
         <Routes>
