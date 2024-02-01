@@ -7,6 +7,7 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes'); // Import your authRoutes
 const productRoutes = require('./routes/productRoutes'); // Import the routes
 const categoriesRoutes = require('./routes/categoriesRoutes'); // Import the routes
+const userRoutes = require('./routes/userRoutes'); // Import the routes
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(express.json()); // For parsing application/json
 app.use(cookieParser());
 app.use('/api/products', productRoutes); // Use the routes
 app.use('/api/categories', categoriesRoutes); // Use the routes 
+app.use('/api/users', userRoutes); // Use the routes
 app.use(authRoutes); // Use the routes defined in authRoutes.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

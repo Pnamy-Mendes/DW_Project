@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     githubToken: { type: String },
     typeUser: { type: mongoose.Schema.Types.ObjectId, ref: 'TypeUser' } // Reference to TypeUser
+    
 });
 
 /* userSchema.pre('save', function(next) {

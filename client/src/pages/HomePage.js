@@ -11,7 +11,7 @@ function HomePage() {
         const fetchProducts = async () => {
             try {
                 const queryParams = new URLSearchParams({ ...filters, ...sort });
-                const response = await axios.get(`http://localhost:3001/products?${queryParams}`);
+                const response = await axios.get(`http://localhost:3001/api/products?${queryParams}`);
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products', error);

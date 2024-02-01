@@ -12,6 +12,7 @@ import RegisterForm from './components/RegisterForm';
 import Logout from './utils/Logout';
 import FileUpload from './components/fileUpload';
 import ProductsDemo from './components/ProductManagement'; 
+import ManageUserRelated from './components/ManageUserRelated';
 
 /* import ProductManagement from './components/ProductManagement'; */
 
@@ -38,6 +39,7 @@ function App() {
               <Route path="/logout" element={<Logout />} />
               <Route path="/file" element={<FileUpload />} />
               <Route path="/admin/products" element={<ProductsDemo />} /> 
+              <Route path="/admin/users" element={<ManageUserRelated />} />
               {/* Add more routes as needed */}
           </Routes>
       </Router>
