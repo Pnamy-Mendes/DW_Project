@@ -22,19 +22,19 @@ const corsOptions = {
 
 
 // MongoDB connection
-mongoose.connect('mongodb://192.168.1.134:27017/ecommerce', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-
-// Diogo
-/* mongoose.connect('mongodb://82.154.212.23:27017/ecommerce', {
+/* mongoose.connect('mongodb://192.168.1.134:27017/ecommerce', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:')); */
+
+
+// Diogo
+mongoose.connect('mongodb://82.154.212.23:27017/ecommerce', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
  
 
 // Middleware 
