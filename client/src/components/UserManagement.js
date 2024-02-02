@@ -6,7 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import UserTable from './UserTable';
 import UserForm from './UserForm'; 
-import { ConfigContext } from './../contexts/ConfigContext';
+import ConfigContext from './../contexts/ConfigContext';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
