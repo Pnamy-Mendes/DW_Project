@@ -67,6 +67,7 @@ function LoginForm({ showToast }) {
         }
 
         try {
+            console.log('login', username, password, apiUrl)
             const response = await axios.post(`${apiUrl}:3001/login`, { username, password }, { withCredentials: true }); 
             const requiredPermissions = ['4']
             const userPermissions = Cookies.get('userPermissions');

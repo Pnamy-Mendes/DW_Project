@@ -18,53 +18,53 @@ import ProductsDemo from './components/ProductManagement';
 import ManageUserRelated from './components/ManageUserRelated';
 import { useNavigate } from 'react-router-dom';
 import { MegaMenu } from 'primereact/megamenu';
+import { Badge } from 'primereact/badge';
 import './pages/css/navbar.css';
 
 function Navbar() {
-
-  const userPermissions = Cookies.get('userPermissions');
-  const requiredPermissions = ['4'];
-  const hasPermission =
-    userPermissions &&
-    requiredPermissions.every((permission) => userPermissions.includes(permission)); // Convert to string for comparison 
-  const isLoggedIn = Cookies.get('userInfo');
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const userInfo = Cookies.get('userInfo') ? JSON.parse(Cookies.get('userInfo')) : null;
+  const userPermissions = Cookies.get('userPermissions') ? JSON.parse(Cookies.get('userPermissions')) : [];
+  const hasAdminAccess = userPermissions.includes('4');
   const [cartCount, setCartCount] = useState(0);
+  const isAuthenticated = Cookies.get('userInfo');
 
   useEffect(() => {
-    // Retrieve cart count from a normal cookie
-    const cartItems = Cookies.get('cartItems') ? JSON.parse(Cookies.get('cartItems')) : [];
-    setCartCount(cartItems.length);
-}, []);
+      const cartItems = Cookies.get('cartItems') ? JSON.parse(Cookies.get('cartItems')) : [];
+      setCartCount(cartItems.length);
+  }, []);
 
-const items = [
-  {
-      label: `Cart (${cartCount})`,
-      icon: 'pi pi-fw pi-shopping-cart',
-      command: () => {
-          navigate('/cart');
-      }
-  },
-  ...(userPermissions && userPermissions.includes('4') ? [{
-      label: 'Admin Panel',
-      icon: 'pi pi-fw pi-cog',
-      command: () => {
-          navigate('/admin');
-      }
-  }] : []),
-  {
-      label: 'Logout',
-      icon: 'pi pi-fw pi-sign-out',
-      command: () => {
-          navigate('/logout');
-      }
-  }
-];
+  const menuItems = [
+    {
+      label: userInfo ? userInfo.username : 'User',
+      icon: 'pi pi-fw pi-user',
+      command: () => {},
+      items: [
+        [
+          ...(hasAdminAccess ? [{ label: 'Admin Panel', command: () => navigate('/admin') }] : []),
+          { label: 'Logout', command: () => navigate('/logout') }
+        ]
+      ]
+    }
+  ];
 
-return isLoggedIn ? <MegaMenu model={[{items: [items]}]} orientation="horizontal" /> : null;
+  // Wrap both the MegaMenu and the cart icon with a div to align them
+  return (
+    <div>
 
-
+      {isAuthenticated && <div className="navbar">
+        <div className="menu-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <MegaMenu model={menuItems} orientation="horizontal" />
+          <Badge value={cartCount} severity="info" className="cart-badge" onClick={() => navigate('/cart')}>
+            <i className="pi pi-shopping-cart" style={{ cursor: 'pointer' }}></i>
+          </Badge>
+        </div>
+      </div>}
+    </div>
+  );
 }
+
+
 
 function ProtectedRoute({ children, requiredPermissions }) {
   const userPermissions = Cookies.get('userPermissions');

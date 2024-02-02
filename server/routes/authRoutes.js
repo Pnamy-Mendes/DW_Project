@@ -16,10 +16,12 @@ async function setUserInfoAndPermissions(res, user) {
                 path: 'typeUser',
                 populate: { path: 'permissions' }
             });
-
+        
+        
         if (populatedUser.typeUser && populatedUser.typeUser.permissions) {
             const permissions = populatedUser.typeUser.permissions.map(perm => perm.level);
 
+            console.log('Setting user info and permissions:')
             // Set the userInfo cookie
             res.cookie('userInfo', JSON.stringify({ userId: user._id, username: user.username }), {
                 secure: true,
@@ -87,7 +89,9 @@ router.get('/auth/github', (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        console.log(username, password);
         const user = await User.findOne({ lowercaseUsername: username.toLowerCase() }).populate('typeUser');
+        console.log(user)
 
         if (user && bcrypt.compareSync(password, user.password)) {
             await setUserInfoAndPermissions(res, user);

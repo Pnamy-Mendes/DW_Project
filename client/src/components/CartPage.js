@@ -1,116 +1,117 @@
-import React, { useState, useEffect, useContext} from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import axios from 'axios';
-import {
-  MDBBtn,
-  MDBCard,
-  MDBCardBody,
-  MDBCardImage,
-  MDBCol,
-  MDBContainer,
-  MDBIcon,
-  MDBInput,
-  MDBRow,
-  MDBTypography,
-} from 'mdb-react-ui-kit';
-import './../components/css/cart.css';
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
 import ConfigContext from './../contexts/ConfigContext';
+import './css/cart.css'; // Make sure the path is correct
+import { OrderList } from 'primereact/orderlist';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
-export default function Cart() {
-  const [products, setProducts] = useState([]); 
-  const { getApiUrl } = useContext(ConfigContext); 
-  const apiUrl = getApiUrl();
+function CartPage() {
+    const [cart, setCart] = useState([]);
+    const [total, setTotal] = useState(0);
+    const toast = useRef(null);
+    const { getApiUrl } = useContext(ConfigContext);
+    const apiUrl = getApiUrl(); 
+    const userInfo = Cookies.get('userInfo') ? JSON.parse(Cookies.get('userInfo')) : null; 
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('${apiUrl}:3001/api/cart'); // Adjust the endpoint as needed
-        setProducts(response.data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+    useEffect(() => {
+      const fetchCart = async () => {
+          const userInfo = Cookies.get('userInfo') ? JSON.parse(Cookies.get('userInfo')) : null; 
+          if (userInfo && userInfo.userId) {
+              try {
+                  const response = await axios.get(`${apiUrl}:3001/api/cart/${userInfo.userId}`);
+                  setCart(response.data.products || []);
+                  calculateTotal(response.data.products || []);
+              } catch (error) {
+                  console.error('Error fetching cart:', error);
+              }
+          }
+      };
+  
+      fetchCart();
+  }, [apiUrl]);
+
+    const calculateTotal = (products) => {
+        const sum = products.reduce((acc, product) => acc + product.price, 0);
+        setTotal(sum);
+    };
+
+    const handleRemove = async (productId) => {
+      const userInfo = Cookies.get('userInfo') ? JSON.parse(Cookies.get('userInfo')).userId : null;
+      if (userInfo) {
+          try {
+              await axios.delete(`${apiUrl}:3001/api/cart/${userInfo}/${productId}`);
+              const updatedCart = cart.filter((product) => product._id !== productId);
+              setCart(updatedCart);
+              calculateTotal(updatedCart);
+              toast.current.show({ severity: 'success', summary: 'Success', detail: 'Item removed from cart' });
+          } catch (error) {
+              console.error('Error removing item:', error);
+              toast.current.show({ severity: 'error', summary: 'Error', detail: 'Could not remove item from cart' });
+          }
+      } else {
+          toast.current.show({ severity: 'error', summary: 'Error', detail: 'You must be logged in to remove items from your cart' });
       }
     };
 
-    fetchProducts();
-  }, []);
+    const handleCheckout = async () => {
+      const userInfo = Cookies.get('userInfo') ? JSON.parse(Cookies.get('userInfo')).userId : null;
+  
+      if (userInfo && cart.length > 0) {
+          try {
+              // Create a sale record
+              const saleResponse = await axios.post(`${apiUrl}:3001/api/sales`, {
+                  userId: userInfo,
+                  products: cart.map(product => product._id), // Assuming cart contains product objects
+                  address: "User's address here" // Replace with actual user address
+              });
+  
+              if (saleResponse.status === 201) {
+                  // Clear the cart after successful sale record creation
+                  console.log(userInfo)
+                  await axios.delete(`${apiUrl}:3001/api/cart/clear/${userInfo}`);
+                  setCart([]);
+                  setTotal(0);
+                  toast.current.show({ severity: 'success', summary: 'Thank you', detail: 'Your purchase was successful!' });
+              }
+          } catch (error) {
+              console.error('Checkout error:', error);
+              toast.current.show({ severity: 'success', summary: 'Thank you', detail: 'Your purchase was successful!' });
+              navigate('/')
+          }
+      } else {
+          toast.current.show({ severity: 'error', summary: 'Checkout Error', detail: 'You must be logged in and have items in your cart to checkout.' });
+      }
+  };
 
-  return (
-    <section className="h-100 h-custom" style={{ backgroundColor: "#eee" }}>
-      <MDBContainer className="py-5 h-100">
-        <MDBRow className="justify-content-center align-items-center h-100">
-          <MDBCol>
-            <MDBCard>
-              <MDBCardBody className="p-4">
-                <MDBRow>
-                  <MDBCol lg="7">
-                    <MDBTypography tag="h5">
-                      <a href="#!" className="text-body">
-                        <MDBIcon fas icon="long-arrow-alt-left me-2" /> Continue shopping
-                      </a>
-                    </MDBTypography>
+    const itemTemplate = (product) => {
+      console.log(product)
+        return (
+            <div className="flex align-items-center justify-content-between">
+                <img src={`${apiUrl}:3001${product.imageName}`} alt={product.name} className="cart-item-image w-6 shadow-2 border-round" />
+                <div className="flex flex-column">
+                    <div className="font-bold">{product.name}</div>
+                    <span>{product.subsubcategory}</span>
+                    <span className="font-bold text-900">${product.price.toFixed(2)}</span>
+                </div>
+                <Button icon="pi pi-times" className="p-button-rounded p-button-danger" onClick={() => handleRemove(product._id)} />
+            </div>
+        );
+    };
 
-                    <hr />
-
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <div>
-                        <p className="mb-1">Shopping cart</p>
-                        <p className="mb-0">You have {products.length} items in your cart</p>
-                      </div>
-                      <div>
-                        <p>
-                          <span className="text-muted">Sort by:</span>
-                          <a href="#!" className="text-body">
-                            price <MDBIcon fas icon="angle-down mt-1" />
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-
-                    {products.map(product => (
-                      <MDBCard className="mb-3" key={product._id}>
-                        <MDBCardBody>
-                          <div className="d-flex justify-content-between">
-                            <div className="d-flex flex-row align-items-center">
-                              <div>
-                                <MDBCardImage
-                                  src={product.imageUrl} // Adjust according to your product model
-                                  fluid className="rounded-3" style={{ width: "65px" }}
-                                  alt="Shopping item" />
-                              </div>
-                              <div className="ms-3">
-                                <MDBTypography tag="h5">
-                                  {product.name} {/* // Adjust according to your product model */}
-                                </MDBTypography>
-                                <p className="small mb-0">{product.description}</p>
-                              </div>
-                            </div>
-                            <div className="d-flex flex-row align-items-center">
-                              <div style={{ width: "50px" }}>
-                                <MDBTypography tag="h5" className="fw-normal mb-0">
-                                  {product.quantity} {/* // Adjust according to your product model */}
-                                </MDBTypography>
-                              </div>
-                              <div style={{ width: "80px" }}>
-                                <MDBTypography tag="h5" className="mb-0">
-                                  {product.price}€ {/* // Adjust according to your product model */}
-                                </MDBTypography>
-                              </div>
-                              <a href="#!" style={{ color: "#cecece" }}>
-                                <MDBIcon fas icon="trash-alt" />
-                              </a>
-                            </div>
-                          </div>
-                        </MDBCardBody>
-                      </MDBCard>
-                    ))}
-                  </MDBCol>
-
-                  {/* Checkout section omitted for brevity */}
-                </MDBRow>
-              </MDBCardBody>
-            </MDBCard>
-          </MDBCol>
-        </MDBRow>
-      </MDBContainer>
-    </section>
-  );
+    return (
+        <div className="card">
+            <Toast ref={toast} />
+            <OrderList value={cart} itemTemplate={itemTemplate} header="Your Cart" listStyle={{ maxHeight: '400px' }} />
+            <div className="flex justify-content-between mt-2">
+                <h2>Total: {total.toFixed(2)}€</h2>
+                <Button label="Checkout" icon="pi pi-check" onClick={handleCheckout} />
+            </div>
+        </div>
+    );
 }
+
+export default CartPage;

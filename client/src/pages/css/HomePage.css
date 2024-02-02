@@ -1,3 +1,7 @@
+
+
+
+
 .product-img {
     height: 200px; /* Set a fixed height */
     width: 100%; /* Ensure the width is 100% of its container */
@@ -12,3 +16,5 @@
     width: auto; /* Auto-adjust the width to maintain aspect ratio */
     object-fit: cover; /* Cover the container without distorting the image */
 }
+
+

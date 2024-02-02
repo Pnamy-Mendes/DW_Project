@@ -1,225 +1,214 @@
-/* adminPanelStyles.css */
-
-.admin-panel {
-    font-family: 'Poppins', sans-serif;
+body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   
-  .admin-panel .bg-white {
-    background-color: #ffffff;
-  }
-  
-  .admin-panel .text-gray-700 {
-    color: #4a5568;
-  }
-  
-  .admin-panel .text-teal-600 {
-    color: #4fd1c5;
-  }
-  
-  .admin-panel .text-white {
-    color: #ffffff;
-  }
-  
-  .admin-panel .hover\:bg-teal-500:hover {
-    background-color: #38b2ac;
-  }
-  
-  .admin-panel .hover\:text-white:hover {
-    color: #ffffff;
-  }
-  
-  .admin-panel .rounded-md {
-    border-radius: 0.375rem;
-  }
-  
-  .admin-panel .border-2 {
-    border-width: 2px;
-  }
-  
-  .admin-panel .border-gray-200 {
-    border-color: #edf2f7;
-  }
-  
-  .admin-panel .shadow-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
-  
-  .admin-panel .p-2 {
-    padding: 0.5rem;
-  }
-  
-  .admin-panel .px-3 {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-  
-  .admin-panel .py-2 {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  
-  .admin-panel .w-5 {
-    width: 1.25rem;
-  }
-  
-  .admin-panel .h-5 {
-    height: 1.25rem;
-  }
-  
-  .admin-panel .w-6 {
-    width: 1.5rem;
-  }
-  
-  .admin-panel .h-6 {
-    height: 1.5rem;
-  }
-  
-  .admin-panel .space-y-6 > * + * {
-    margin-top: 1.5rem;
-  }
-  
-  .admin-panel .space-y-10 > * + * {
-    margin-top: 2.5rem;
-  }
-  
-  .admin-panel .flex {
+  #view {
     display: flex;
-  }
-  
-  .admin-panel .flex-row {
     flex-direction: row;
-  }
-  
-  .admin-panel .flex-col {
-    flex-direction: column;
-  }
-  
-  .admin-panel .items-center {
-    align-items: center;
-  }
-  
-  .admin-panel .justify-center {
-    justify-content: center;
-  }
-  
-  .admin-panel .h-full {
+    width: 100vw;
     height: 100%;
   }
   
-  .admin-panel .w-screen {
-    width: 100vw;
+  #button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border-width: 2px;
+    border-color: #e5e7eb;
+    color: #6b7280;
+    background-color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   
-  .admin-panel .overflow-x-hidden {
+  .svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: currentColor;
+  }
+  
+  #sidebar {
     overflow-x: hidden;
-  }
-  
-  .admin-panel .transition-transform {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    height: 100vh;
+    background-color: #ffffff;
     transition-property: transform;
-  }
-  
-  .admin-panel .duration-300 {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
-  .admin-panel .ease-in-out {
+  #sidebar2 {
+    margin-top: 2.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  #css1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  #css2 {
+    display: none;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  #menu {
+    display: flex;
+    margin-top: 0.5rem;
+    flex-direction: column;
+  }
+  
+  #menu1 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: #374151;
+    transition-property: background-color, border-color, color, fill, stroke,
+      opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #menu1:hover {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #681e1e;
+  }
+  
+  #menu2 {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+  }
+  
+  #menu3 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: #374151;
+    transition-property: background-color, border-color, color, fill, stroke,
+      opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+    transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .admin-panel .absolute {
-    position: absolute;
+  #menu3:hover {
+    color: #681e1e;
+    --transform-scale-x: 1.05;
+    --transform-scale-y: 1.05;
   }
   
-  .admin-panel .top-0 {
-    top: 0;
+  #menu4 {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
   }
   
-  .admin-panel .left-0 {
-    left: 0;
-  }
-  
-  .admin-panel .sm\:hidden {
-    display: none;
-  }
-  
-  .admin-panel .md\:block {
-    display: block;
-  }
-  
-  .admin-panel .lg\:w-60 {
-    width: 15rem;
-  }
-  
-  .admin-panel .focus\:outline-none:focus {
-    outline: 0;
-  }
-  
-  .admin-panel .focus\:bg-teal-500:focus {
-    background-color: #38b2ac;
-  }
-  
-  .admin-panel .focus\:text-white:focus {
-    color: #ffffff;
-  }
-  
-  .admin-panel .hover\:scale-105:hover {
-    transform: scale(1.05);
-  }
-  
-  /* Additional custom styles for your AdminPanel components */
-  .admin-panel .font-bold {
-    font-weight: bold;
-  }
-  
-  .admin-panel .text-sm {
+  #menu5 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 0.375rem;
     font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: #374151;
+    transition-property: background-color, border-color, color, fill, stroke,
+      opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #menu5:hover {
+    color: #681e1e;
+    --transform-scale-x: 1.05;
+    --transform-scale-y: 1.05;
   }
   
-  .admin-panel .text-base {
-    font-size: 1rem;
+  #menu6 {
+    display: inline;
   }
   
-  .admin-panel .text-xl {
-    font-size: 1.25rem;
-  }
-  
-  .admin-panel .py-12 {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-  }
-  
-  .admin-panel .mx-auto {
+  #css3 {
     margin-left: auto;
     margin-right: auto;
   }
-  
-  .admin-panel .bg-red-500 {
-    background-color: #f56565;
+  #css4 {
+    display: flex;
+    position: relative;
+    margin-left: 1rem;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
   
-  .admin-panel .px-6 {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-  
-  .admin-panel .py-2 {
+  #css5 {
+    position: absolute;
+    top: 0;
+    right: 0;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-  }
-  
-  .admin-panel .rounded-md {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    margin-top: 1rem;
     border-radius: 0.375rem;
+    color: #ffffff;
+    background-color: #ef4444;
   }
   
-  .admin-panel .space-x-4 > * + * {
-    margin-left: 1rem;
+  #css6 {
+    padding: 3rem;
+    border-radius: 0.375rem;
+    background-color: #f9fafb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   
-  .admin-panel .relative {
-    position: relative;
+  #css7 {
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+  }
+  #css8 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
   }
   
-  /* Ensure to add any other Tailwind utility classes you use in your component */
+  .ccs9 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    flex: 1 1 0%;
+  }
   

@@ -1,0 +1,12 @@
+.menu-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .cart-badge {
+    cursor: pointer;
+    margin-left: auto; /* This will push the cart icon to the right */
+  }
+  

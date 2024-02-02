@@ -3,3 +3,9 @@
     height: 100vh !important;
     }
 }
+
+.cart-item-image {
+    width: 100px; /* Set your desired width */
+    height: 100px; /* Set your desired height */
+    object-fit: cover; /* This makes sure the image covers the area without distorting aspect ratio */
+}
