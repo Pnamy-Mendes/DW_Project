@@ -41,6 +41,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/ItemCount', async (req, res) => {
+    try {
+      const itemCount = await Product.countDocuments();
+      res.json({ count: itemCount });
+    } catch (error) {
+      console.error('Error fetching created items count:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+
 
 // Get a single product by ID
 router.get('/:productId', async (req, res) => {
