@@ -20,13 +20,10 @@ const UserTypeForm = ({ userType, onSave, onCancel, allPermissions }) => {
     };
 
     // Function to customize the label displayed in the control
-    const selectedItemsTemplate = (options) => {
+    const selectedItemsLabel = (options) => {
         if (options.value) {
-            let label = `${options.value.length} permission${options.value.length !== 1 ? 's' : ''} selected`;
-            if (options.value.length === allPermissions.length) {
-                label = 'All selected';
-            }
-            return label;
+            const allSelected = options.value.length === allPermissions.length;
+            return allSelected ? 'All selected' : `${options.value.length} Permission${options.value.length > 1 ? 's' : ''} Selected`;
         }
         return 'Select permissions';
     };
@@ -41,7 +38,8 @@ const UserTypeForm = ({ userType, onSave, onCancel, allPermissions }) => {
                 optionLabel="description"
                 optionValue="_id"
                 placeholder="Select Permissions"
-                display={selectedItemsTemplate}
+                displaySelectedLabel={selectedItemsLabel}
+                maxSelectedLabels={1} // This will only show up to 1 selected items before showing a summary
             />
             <Button type="submit" label="Save" />
             <Button label="Cancel" onClick={onCancel} className="p-button-secondary" />

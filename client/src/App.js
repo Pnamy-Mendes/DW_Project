@@ -7,14 +7,14 @@ import { Toast } from 'primereact/toast';
 import HomePage from './pages/HomePage';
 import Products from './pages/Products'; 
 import ProductDetail from './pages/ProductDetail';
-import CartPage from './pages/CartPage';
+import CartPage from './components/CartPage';
 import AdminPanel from './pages/AdminPanel';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import Logout from './utils/Logout';
 import FileUpload from './components/fileUpload';
 import ProductsDemo from './components/ProductManagement'; 
-import ManageUserRelated from './components/ManageUserRelated';
+import ManageUserRelated from './components/ManageUserRelated'; 
 
 function App() {
   const toast = useRef(null);

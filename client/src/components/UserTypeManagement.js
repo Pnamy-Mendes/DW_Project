@@ -53,17 +53,38 @@ const UserTypeManagement = () => {
     };
 
     const onSaveUserType = async (userTypeData) => {
+        // Define the correct URL and method for saving the UserType
         const method = userTypeData._id ? 'put' : 'post';
-        const url = userTypeData._id ? `${apiUrl}:3001/api/typeUser/${userTypeData._id}` : `${apiUrl}:3001/api/typeUser`;
-
+        const url = userTypeData._id
+            ? `${apiUrl}:3001/api/typeUser/${userTypeData._id}`
+            : `${apiUrl}:3001/api/typeUser`;
+    
+        // Convert permissions back to the full objects expected by the backend
+        const userTypeWithFullPermissions = {
+            ...userTypeData,
+            permissions: userTypeData.permissions.map(id =>
+                allPermissions.find(perm => perm._id === id)
+            ),
+        };
+    
         try {
-            await axios[method](url, userTypeData);
+            await axios[method](url, userTypeWithFullPermissions);
             fetchUserTypes();
             setUserTypeDialog(false);
-            toast.current.show({ severity: 'success', summary: 'Success', detail: 'User Type saved successfully.', life: 3000 });
+            toast.current.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User Type saved successfully.',
+                life: 3000,
+            });
         } catch (error) {
             console.error('Error saving user type:', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to save user type.', life: 3000 });
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to save user type.',
+                life: 3000,
+            });
         }
     };
 
@@ -109,7 +130,7 @@ const UserTypeManagement = () => {
                     userType={editingUserType} 
                     onSave={onSaveUserType} 
                     onCancel={hideDialog} 
-                    allPermissions={allPermissions}
+                    allPermissions={allPermissions} 
                 />
             </Dialog>
             <Dialog 
