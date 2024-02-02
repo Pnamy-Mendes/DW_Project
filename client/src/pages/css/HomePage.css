@@ -1,0 +1,14 @@
+.product-img {
+    height: 200px; /* Set a fixed height */
+    width: 100%; /* Ensure the width is 100% of its container */
+    overflow: hidden; /* Hide parts of the image that don't fit */
+    display: flex; /* Use flex to center the image inside the container */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+.product-img img {
+    height: 100%; /* Make the image fill the container height */
+    width: auto; /* Auto-adjust the width to maintain aspect ratio */
+    object-fit: cover; /* Cover the container without distorting the image */
+}

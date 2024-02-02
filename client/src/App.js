@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ConfigProvider } from './contexts/ConfigContext';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { Toast } from 'primereact/toast';
 import Cookies from 'js-cookie';
 
@@ -16,7 +16,55 @@ import Logout from './utils/Logout';
 import FileUpload from './components/fileUpload';
 import ProductsDemo from './components/ProductManagement';
 import ManageUserRelated from './components/ManageUserRelated';
+import { useNavigate } from 'react-router-dom';
+import { MegaMenu } from 'primereact/megamenu';
+import './pages/css/navbar.css';
 
+function Navbar() {
+
+  const userPermissions = Cookies.get('userPermissions');
+  const requiredPermissions = ['4'];
+  const hasPermission =
+    userPermissions &&
+    requiredPermissions.every((permission) => userPermissions.includes(permission)); // Convert to string for comparison 
+  const isLoggedIn = Cookies.get('userInfo');
+  const navigate = useNavigate(); 
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    // Retrieve cart count from a normal cookie
+    const cartItems = Cookies.get('cartItems') ? JSON.parse(Cookies.get('cartItems')) : [];
+    setCartCount(cartItems.length);
+}, []);
+
+const items = [
+  {
+      label: `Cart (${cartCount})`,
+      icon: 'pi pi-fw pi-shopping-cart',
+      command: () => {
+          navigate('/cart');
+      }
+  },
+  ...(userPermissions && userPermissions.includes('4') ? [{
+      label: 'Admin Panel',
+      icon: 'pi pi-fw pi-cog',
+      command: () => {
+          navigate('/admin');
+      }
+  }] : []),
+  {
+      label: 'Logout',
+      icon: 'pi pi-fw pi-sign-out',
+      command: () => {
+          navigate('/logout');
+      }
+  }
+];
+
+return isLoggedIn ? <MegaMenu model={[{items: [items]}]} orientation="horizontal" /> : null;
+
+
+}
 
 function ProtectedRoute({ children, requiredPermissions }) {
   const userPermissions = Cookies.get('userPermissions');
@@ -74,10 +122,11 @@ function App() {
     <ConfigProvider /* value={configValue}  */ value={{ getApiUrl }}>
       <Router>
         <Toast ref={toast} />
+        <Navbar />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/" element={<HomePage showToast={showToast}/>} />
+          {/* <Route path="/products" element={<Products />} />
+          <Route path="/product/:id" element={<ProductDetail />} /> */}
           <Route path="/cart" element={<CartPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/login" element={<LoginForm showToast={showToast} />} />

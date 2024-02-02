@@ -1,0 +1,225 @@
+/* adminPanelStyles.css */
+
+.admin-panel {
+    font-family: 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .admin-panel .bg-white {
+    background-color: #ffffff;
+  }
+  
+  .admin-panel .text-gray-700 {
+    color: #4a5568;
+  }
+  
+  .admin-panel .text-teal-600 {
+    color: #4fd1c5;
+  }
+  
+  .admin-panel .text-white {
+    color: #ffffff;
+  }
+  
+  .admin-panel .hover\:bg-teal-500:hover {
+    background-color: #38b2ac;
+  }
+  
+  .admin-panel .hover\:text-white:hover {
+    color: #ffffff;
+  }
+  
+  .admin-panel .rounded-md {
+    border-radius: 0.375rem;
+  }
+  
+  .admin-panel .border-2 {
+    border-width: 2px;
+  }
+  
+  .admin-panel .border-gray-200 {
+    border-color: #edf2f7;
+  }
+  
+  .admin-panel .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .admin-panel .p-2 {
+    padding: 0.5rem;
+  }
+  
+  .admin-panel .px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .admin-panel .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .admin-panel .w-5 {
+    width: 1.25rem;
+  }
+  
+  .admin-panel .h-5 {
+    height: 1.25rem;
+  }
+  
+  .admin-panel .w-6 {
+    width: 1.5rem;
+  }
+  
+  .admin-panel .h-6 {
+    height: 1.5rem;
+  }
+  
+  .admin-panel .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .admin-panel .space-y-10 > * + * {
+    margin-top: 2.5rem;
+  }
+  
+  .admin-panel .flex {
+    display: flex;
+  }
+  
+  .admin-panel .flex-row {
+    flex-direction: row;
+  }
+  
+  .admin-panel .flex-col {
+    flex-direction: column;
+  }
+  
+  .admin-panel .items-center {
+    align-items: center;
+  }
+  
+  .admin-panel .justify-center {
+    justify-content: center;
+  }
+  
+  .admin-panel .h-full {
+    height: 100%;
+  }
+  
+  .admin-panel .w-screen {
+    width: 100vw;
+  }
+  
+  .admin-panel .overflow-x-hidden {
+    overflow-x: hidden;
+  }
+  
+  .admin-panel .transition-transform {
+    transition-property: transform;
+  }
+  
+  .admin-panel .duration-300 {
+    transition-duration: 300ms;
+  }
+  
+  .admin-panel .ease-in-out {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .admin-panel .absolute {
+    position: absolute;
+  }
+  
+  .admin-panel .top-0 {
+    top: 0;
+  }
+  
+  .admin-panel .left-0 {
+    left: 0;
+  }
+  
+  .admin-panel .sm\:hidden {
+    display: none;
+  }
+  
+  .admin-panel .md\:block {
+    display: block;
+  }
+  
+  .admin-panel .lg\:w-60 {
+    width: 15rem;
+  }
+  
+  .admin-panel .focus\:outline-none:focus {
+    outline: 0;
+  }
+  
+  .admin-panel .focus\:bg-teal-500:focus {
+    background-color: #38b2ac;
+  }
+  
+  .admin-panel .focus\:text-white:focus {
+    color: #ffffff;
+  }
+  
+  .admin-panel .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Additional custom styles for your AdminPanel components */
+  .admin-panel .font-bold {
+    font-weight: bold;
+  }
+  
+  .admin-panel .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .admin-panel .text-base {
+    font-size: 1rem;
+  }
+  
+  .admin-panel .text-xl {
+    font-size: 1.25rem;
+  }
+  
+  .admin-panel .py-12 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  .admin-panel .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .admin-panel .bg-red-500 {
+    background-color: #f56565;
+  }
+  
+  .admin-panel .px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .admin-panel .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .admin-panel .rounded-md {
+    border-radius: 0.375rem;
+  }
+  
+  .admin-panel .space-x-4 > * + * {
+    margin-left: 1rem;
+  }
+  
+  .admin-panel .relative {
+    position: relative;
+  }
+  
+  /* Ensure to add any other Tailwind utility classes you use in your component */
+  

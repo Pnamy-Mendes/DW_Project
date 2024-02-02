@@ -33,7 +33,13 @@ function LoginForm({ showToast }) {
 
     useEffect(() => {
         if (isAuthenticated()) {
-            navigate('/');
+            const requiredPermissions = ['4']
+            const userPermissions = Cookies.get('userPermissions');
+            const hasPermission =
+                userPermissions &&
+                requiredPermissions.every((permission) => userPermissions.includes(permission));
+            
+            hasPermission ? navigate('/admin/') : navigate('/');
         }
         if (!isOAuthLogin && (!username || !password)) {
             const errorParam = searchParams.get('error');
