@@ -24,9 +24,9 @@ const RegisteredUsers = () => {
   }, [apiUrl]);
 
   return (
-    <div className="bg-gray-50 p-12 rounded-md shadow-md">
-      <h3 className="text-lg font-semibold mb-2">Registered Users</h3>
-      <p className="text-3xl font-bold text-purple-500">{userCount}</p>
+    <div id = 'css6'>
+      <h3 id= 'css7'>Registered Users</h3>
+      <p id = 'css8'>{userCount}</p>
     </div>
   );
 };

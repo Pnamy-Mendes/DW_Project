@@ -26,9 +26,9 @@ const CreatedItems = () => {
   }, [apiUrl]);
 
   return (
-    <div className="bg-gray-50 p-12 rounded-md shadow-md">
-      <h3 className="text-lg font-semibold mb-2">Number of Products</h3>
-      <p className="text-3xl font-bold text-indigo-500">{createdItemsCount}</p>
+    <div id= 'css6'>
+      <h3 id= 'css7'>Number of Products</h3>
+      <p id= 'css8'>{createdItemsCount}</p>
     </div>
   );
   
