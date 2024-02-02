@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext'; 
 import { Message } from 'primereact/message';
 import { Button } from 'primereact/button'; 
+import Cookies from 'js-cookie';
 
 
 import './css/LoginForm.css';
@@ -60,9 +61,15 @@ function LoginForm({ showToast }) {
         }
 
         try {
-            const response = await axios.post(`${apiUrl}:3001/login`, { username, password }, { withCredentials: true });
-            localStorage.setItem('userPermissions', JSON.stringify(response.data.permissions || []));
-            navigate('/');
+            const response = await axios.post(`${apiUrl}:3001/login`, { username, password }, { withCredentials: true }); 
+            const requiredPermissions = ['4']
+            const userPermissions = Cookies.get('userPermissions');
+            const hasPermission =
+                userPermissions &&
+                requiredPermissions.every((permission) => userPermissions.includes(permission));
+            
+            hasPermission ? navigate('/admin/') : navigate('/');
+            
         } catch (error) {
             if (error.response) {
                 setError(error.response.data.message);
