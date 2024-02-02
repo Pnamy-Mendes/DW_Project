@@ -216,42 +216,28 @@ export default function ProductManagement() {
     };
 
     const saveProduct = (p) => {
-        console.log('p: saveProduct', p)
-        console.log('product: saveProduct', product)
-        if (p.name.trim()) {
+        const method = p._id ? axios.put : axios.post;
+        const url = p._id ? `${apiUrl}:3001/api/products/${p._id}` : `${apiUrl}:3001/api/products`;
+        
+        method(url, p).then(response => {
+            const savedProduct = response.data;
+        
             if (p._id) {
-                // Update existing product
-                axios.put(`${apiUrl}:3001/api/products/${product._id}`, p)
-                    .then(response => {
-                        console.log('response.data: ', response.data);
-                        console.log('products: ', products);
-                        // Replace the updated product in the state
-                        const updatedProducts = products.map(prod => prod._id === p._id ? { ...response.data } : prod);
-                        setProducts(updatedProducts);
-                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-                    })
-                    .catch(error => {
-                        console.error('Error updating product:', error);
-                        // Optionally, show an error toast message
-                    });
+                const updatedProducts = products.map(prod => prod._id === p._id ? savedProduct : prod);
+                setProducts(updatedProducts);
             } else {
-                // Create new product
-                axios.post(`${apiUrl}:3001/api/products`, p)
-                    .then(response => {
-                        // Add the new product to the state
-                        console.log('response.data: ', response.data);
-                        console.log('products: ', products);
-                        setProducts([...products, p]);
-                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-                    })
-                    .catch(error => {
-                        console.error('Error creating product:', error);
-                        // Optionally, show an error toast message
-                    });
+                // Refresh products to ensure the newly added product includes category details
+                fetchProducts();
             }
+        
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: `Product ${p._id ? 'Updated' : 'Created'}`, life: 3000 });
             setProductDialog(false);
-        }
+        }).catch(error => {
+            console.error(`Error ${p._id ? 'updating' : 'creating'} product:`, error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Failed to ${p._id ? 'update' : 'create'} product`, life: 3000 });
+        });
     };
+    
     
 
     const editProduct = (product) => {

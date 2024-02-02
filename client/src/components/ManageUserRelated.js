@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import UserManagement from './UserManagement'; // Component to manage users
-/* import UserTypeTable from './UserTypeTable'; // Component to manage user types
-import PermissionTable from './PermissionTable'; // Component to manage permissions */
+import UserTypeManagement from './UserTypeManagement'; // Component to manage user types
+import PermissionManagement from './PermissionManagement'; // Component to manage permissions */
 
 const ManageUserRelated = () => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -19,11 +19,11 @@ const ManageUserRelated = () => {
             </TabPanel>
             <TabPanel header="User Types" leftIcon="pi pi-id-card">
                 {/* User types management component */}
-                {/* <UserTypeTable /> */}
+                <UserTypeManagement />
             </TabPanel>
             <TabPanel header="Permissions" leftIcon="pi pi-key">
                 {/* Permissions management component */}
-                {/* <PermissionTable /> */}
+                <PermissionManagement /> 
             </TabPanel>
         </TabView>
     );

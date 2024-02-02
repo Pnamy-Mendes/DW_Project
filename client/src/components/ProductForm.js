@@ -32,8 +32,9 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     }, [product]);
 
     const initializeFormSelections = () => {
-        const initialSubSubCategories = product.subSubCategories || [];
+        const initialSubSubCategories = product.subSubCategories || selectedSubSubCategories || [];
         setSelectedSubSubCategories(initialSubSubCategories);
+        console.log("Initialized.",initialSubSubCategories);
 
         if (initialSubSubCategories.length > 0) {
             const parentSubCategoryId = initialSubSubCategories[0].parentCategory;
@@ -100,7 +101,7 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
         } 
         if (selectedSubCategory) {
             fetchSubSubCategories(selectedSubCategory._id);
-        }  
+        }    
     }, [selectedSubCategory, selectedCategory]);
 
     const handleInputChange = (e, name) => {
@@ -125,6 +126,30 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
             .catch(err => console.error('Error uploading image:', err));
     };
 
+    const handleSubSubCategoriesChange = (e) => {
+        const selectedValues = e.value;
+        console.log("selectedValues",selectedValues);
+        setSelectedSubSubCategories(selectedValues);
+        console.log("Selected sub-subcategories:", selectedValues); // Debugging: Check selected sub-subcategories
+    };
+
+    const handleSubCategoryChange = (e) => {
+        const selectedValues = e.value;
+        console.log("selectedValues subcategory",selectedValues);
+        setSelectedSubCategory(selectedValues);
+        setSelectedSubSubCategories(null);
+        console.log("Selected subcategory:", selectedValues); // Debugging: Check selected sub-subcategories
+    };
+
+    const handleCategoryChange = (e) => {
+        const selectedValues = e.value;
+        console.log("selectedValues category",selectedValues);
+        setSelectedCategory(selectedValues);
+        setSelectedSubCategory(null);
+        setSelectedSubSubCategories(null);
+        console.log("Selected category:", selectedValues); // Debugging: Check selected sub-subcategories
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const subSubCategoryIds = selectedSubSubCategories.map(ssc => ssc._id);
@@ -140,6 +165,10 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
         onSubmit(updatedProduct);
     };
 
+    const formatCurrency = (value) => {
+        return value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
+    };
+
 
     return (
         <form className="p-fluid" onSubmit={handleSubmit}>
@@ -152,23 +181,29 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
                 <label htmlFor="productDescription">Description</label>
                 <InputTextarea id="productDescription" value={product.description || ''} onChange={(e) => handleInputChange(e, 'description')} required rows={3} />
             </div>
-            {/* Other fields... */}
+
+            <div className="field">
+                <label htmlFor="productPrice">Price</label>
+                <InputNumber id="productPrice" value={product.price || 0} onValueChange={(e) => handleInputNumberChange(e, 'price')} mode="currency" currency="EUR" locale="pt-PT" />
+            </div>
+            
             <div className="field">
                 <label htmlFor="productCategory">Category</label>
-                <Dropdown id="productCategory" value={selectedCategory} options={categories} onChange={(e) => setSelectedCategory(e.value)} optionLabel="name" placeholder="Select a Category" />
+                <Dropdown id="productCategory" value={selectedCategory} options={categories} onChange={handleCategoryChange} optionLabel="name" placeholder="Select a Category" />
             </div>
             
             {selectedCategory && (
                 <div className="field">
                     <label htmlFor="productSubCategory">SubCategory</label>
-                    <Dropdown id="productSubCategory" value={selectedSubCategory} options={subCategories} onChange={(e) => setSelectedSubCategory(e.value)} optionLabel="name" placeholder="Select a SubCategory" />
+                    <Dropdown id="productSubCategory" value={selectedSubCategory} options={subCategories} onChange={handleSubCategoryChange} optionLabel="name" placeholder="Select a SubCategory" />
                 </div>
             )}
             
-            {selectedSubCategory && subSubCategories.length > 0 && (
+            {selectedSubCategory /* && subSubCategories.length > 0 */ && (
                 <div className="field">
                     <label htmlFor="productSubSubCategories">Sub-SubCategories</label>
-                    <MultiSelect id="productSubSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={(e) => setSelectedSubSubCategories(e.value)} optionLabel="name" placeholder="Select Sub-SubCategories" />
+                    {/* <MultiSelect id="productSubSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={(e) => setSelectedSubSubCategories(e.value)} optionLabel="name" placeholder="Select Sub-SubCategories" /> */}
+                    <MultiSelect id="productSubSubCategories" value={selectedSubSubCategories} options={subSubCategories} onChange={handleSubSubCategoriesChange} optionLabel="name" placeholder="Select Sub-SubCategories" />
                 </div>
             )}
             <div className="field">

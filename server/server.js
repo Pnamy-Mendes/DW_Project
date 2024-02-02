@@ -9,6 +9,8 @@ const authRoutes = require('./routes/authRoutes'); // Import your authRoutes
 const productRoutes = require('./routes/productRoutes'); // Import the routes
 const categoriesRoutes = require('./routes/categoriesRoutes'); // Import the routes
 const userRoutes = require('./routes/userRoutes'); // Import the routes
+const typeUserRoutes = require('./routes/typeUserRoutes'); // Import the routes
+const permissionRoutes = require('./routes/permissionRoutes'); // Import the routes
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 console.log(process.env.REACT_APP_API_BASE_URL+':3000');
@@ -44,6 +46,8 @@ app.use(cookieParser());
 app.use('/api/products', productRoutes); // Use the routes
 app.use('/api/categories', categoriesRoutes); // Use the routes 
 app.use('/api/users', userRoutes); // Use the routes
+app.use('/api/typeUser', typeUserRoutes); // Use the routes
+app.use('/api/permissions', permissionRoutes); // Use the routes
 app.use(authRoutes); // Use the routes defined in authRoutes.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

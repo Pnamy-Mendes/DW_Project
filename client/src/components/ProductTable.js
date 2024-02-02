@@ -73,20 +73,20 @@ const ProductTable = ({ products, categories, subCategories, onEdit, onDelete, g
             const parentCategoryName = category.parentCategory ? getCategoryHierarchy(category.parentCategory) : '';
             return parentCategoryName ? `${parentCategoryName} -> ${categoryName}` : categoryName;
         };
-    
-        // Sort the subSubCategories alphabetically by their names
-        const sortedSubSubCategories = rowData.subSubCategories.sort((a, b) => a.name.localeCompare(b.name));
-    
+
+        // Check if rowData.subSubCategories exists and is an array before sorting
+        const sortedSubSubCategories = rowData.subSubCategories && Array.isArray(rowData.subSubCategories) ? rowData.subSubCategories.sort((a, b) => (a.name && b.name) ? a.name.localeCompare(b.name) : 0) : [];
+
         const categoryNames = sortedSubSubCategories.map(e => getCategoryHierarchy(e.parentCategory));
         const categoryNamesChilds = sortedSubSubCategories.map(e => e.name).join(", ");
-    
+
         return <span>{categoryNames && categoryNames[0] ? 
-                        `${categoryNames[0]} -> ${categoryNamesChilds}`
-                    : 
-                        categoryNamesChilds[0] ?   
-                            categoryNamesChilds:
-                            "No category"
-                    }</span>;
+                `${categoryNames[0]} -> ${categoryNamesChilds}` 
+            : 
+                categoryNamesChilds[0] ? 
+                    categoryNamesChilds 
+                : 
+                    "No category"}</span>;
     };
     
        

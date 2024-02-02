@@ -96,7 +96,15 @@ const UserManagement = () => {
         <div>
             <Toast ref={toast} />
             <Toolbar className="mb-4" left={leftToolbarTemplate} />
-            <UserTable users={users} editUser={editUser} confirmDeleteUser={confirmDeleteUser} selectedUsers={selectedUsers} setSelectedUsers={setSelectedUsers} />
+            <UserTable 
+                users={users} 
+                editUser={editUser} 
+                deleteUser={confirmDeleteUser}
+                confirmDeleteUser={confirmDeleteUser} 
+                selectedUsers={selectedUsers} 
+                setSelectedUsers={setSelectedUsers}
+                 
+            />
             <Dialog visible={userDialog} style={{ width: '450px' }} header="User Details" modal onHide={hideDialog}>
                 <UserForm user={editingUser} onSave={onSaveUser} onCancel={hideDialog} />
             </Dialog>

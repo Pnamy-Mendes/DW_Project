@@ -1,13 +1,18 @@
 const express = require('express');
 const User = require('../models/User'); // Ensure the path is correct
+const TypeUser = require('../models/TypeUser');
+const Permission = require('../models/Permission');
 const mongoose = require('mongoose');
 
 const router = express.Router();
 
-// Get all users
+// Get all users with their types and permissions
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().populate({
+            path: 'typeUser',
+            populate: { path: 'permissions' }
+        });
         res.json(users);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching users', error: err.message });
@@ -66,5 +71,6 @@ router.delete('/:userId', async (req, res) => {
         res.status(400).json({ message: 'Error deleting user', error: err.message });
     }
 });
+
 
 module.exports = router;
