@@ -67,8 +67,12 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
                 setSubCategories(response.data);
                 // After subcategories are set, find and set the selected subcategory
                 if (subCategoryIdToSelect) {
+                    console.log("subCategoryIdToSelect")
                     const subCategoryToSelect = response.data.find(sc => sc._id === subCategoryIdToSelect);
                     setSelectedSubCategory(subCategoryToSelect);
+                } else {
+
+                    console.log("else")
                 }
             })
             .catch(error => console.error('Error fetching subcategories:', error));
@@ -91,10 +95,13 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     
     useEffect(() => {
         // When a subcategory is selected, fetch its sub-subcategories
+        if (selectedCategory) {
+            fetchSubCategories(selectedCategory._id);
+        } 
         if (selectedSubCategory) {
             fetchSubSubCategories(selectedSubCategory._id);
-        }
-    }, [selectedSubCategory]);
+        }  
+    }, [selectedSubCategory, selectedCategory]);
 
     const handleInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
@@ -121,6 +128,9 @@ export default function ProductForm({ product, setProduct, onSubmit, onHide, onU
     const handleSubmit = (event) => {
         event.preventDefault();
         const subSubCategoryIds = selectedSubSubCategories.map(ssc => ssc._id);
+        console.log("subSubCategoryIds",subSubCategoryIds);
+        console.log("selectedSubSubCategories",selectedSubSubCategories);
+
 
         const updatedProduct = {
             ...product,

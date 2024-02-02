@@ -22,7 +22,7 @@ const corsOptions = {
 
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/ecommerce', {
+mongoose.connect('mongodb://192.168.1.134:27017/ecommerce', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
