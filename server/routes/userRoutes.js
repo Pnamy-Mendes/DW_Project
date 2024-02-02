@@ -14,6 +14,16 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/RegisteredUser', async (req, res) => {
+    try {
+      const userCount = await User.countDocuments();
+      res.json({ count: userCount });
+    } catch (error) {
+      console.error('Error fetching user count:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 // Get a single user by ID
 router.get('/:userId', async (req, res) => {
     try {

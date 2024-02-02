@@ -8,3 +8,4 @@ node_modules/'],
   transformIgnorePatterns: ['/node_modules/'],
   verbose: true,
 };
+node_modules
