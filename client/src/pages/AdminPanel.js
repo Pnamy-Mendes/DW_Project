@@ -1,12 +1,21 @@
 // AdminPanel.js
 import React from 'react';
-import { Link } from 'react-router-dom';
-import TotalSales from './TotalSales'; // Import TotalSales component
-import RegisteredUsers from './RegisteredUsers'; // Import RegisteredUsers component
-import CreatedItems from './ItemCount'; // Import CreatedItems component
+import { useNavigate } from 'react-router-dom';
+import TotalSales from './TotalSales';
+import RegisteredUsers from './RegisteredUsers';
+import CreatedItems from './ItemCount';
 import './css/tailwind.css';
 
 function AdminPanel() {
+  const navigate = useNavigate();
+
+  // Logout function
+  const handleLogout = () => {
+    // Call your logout logic here
+    // For now, let's just redirect to the login page
+    navigate('/login');
+  };
+
   return (
     <body className="font-poppins antialiased">
       <div
@@ -87,19 +96,24 @@ function AdminPanel() {
             </div>
           </div>
         </div>
+
         <div className='mx-auto'>
-          <div className="flex items-center justify-center h-screen space-x-4 ">
-            {/* Display Total Sales Component */}
-            <TotalSales className="flex-1 py-12" />
+  <div className="flex items-center justify-center h-screen space-x-4 relative">
+    <button
+      className="text-white bg-red-500 px-6 py-2 rounded-md focus:outline-none absolute top-0 right-0 mt-4"
+      onClick={handleLogout}
+    >
+      Logout
+    </button>
+    <TotalSales className="flex-1 py-12" />
+    <RegisteredUsers className="flex-1 py-12" />
+    <CreatedItems className="flex-1 py-12" />
+  </div>
+</div>
 
-            {/* Display Registered Users Component */}
-            <RegisteredUsers className="flex-1 py-12" />
-
-            {/* Display Created Items Component */}
-            <CreatedItems className="flex-1 py-12" />
-          </div>
-        </div>
       </div>
+
+      {/* Logout button */}
     </body>
   );
 }
