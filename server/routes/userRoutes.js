@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const TypeUser = require('../models/TypeUser');
 const Permission = require('../models/Permission');
+ 
 const mongoose = require('mongoose');
 
 const router = express.Router();

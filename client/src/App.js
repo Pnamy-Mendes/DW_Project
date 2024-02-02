@@ -17,6 +17,7 @@ import FileUpload from './components/fileUpload';
 import ProductsDemo from './components/ProductManagement';
 import ManageUserRelated from './components/ManageUserRelated';
 
+
 function ProtectedRoute({ children, requiredPermissions }) {
   const userPermissions = Cookies.get('userPermissions');
   const hasPermission =

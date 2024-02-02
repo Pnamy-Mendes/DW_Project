@@ -11,6 +11,8 @@ const categoriesRoutes = require('./routes/categoriesRoutes'); // Import the rou
 const userRoutes = require('./routes/userRoutes'); // Import the routes
 const typeUserRoutes = require('./routes/typeUserRoutes'); // Import the routes
 const permissionRoutes = require('./routes/permissionRoutes'); // Import the routes
+const saleRoutes = require('./routes/saleRoutes'); // Import the routes
+const cartRoutes = require('./routes/cartRoutes'); // Import the routesS
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 console.log(process.env.REACT_APP_API_BASE_URL+':3000');
@@ -50,6 +52,8 @@ app.use('/api/typeUser', typeUserRoutes); // Use the routes
 app.use('/api/permissions', permissionRoutes); // Use the routes
 app.use(authRoutes); // Use the routes defined in authRoutes.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/sales', saleRoutes); // Use the routes
+app.use('/api/cart', cartRoutes); // Use the routes
 
 
 app.get('/config', (req, res) => {

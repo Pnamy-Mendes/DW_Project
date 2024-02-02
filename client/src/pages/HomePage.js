@@ -2,14 +2,19 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Product from './Product';
 import ConfigContext from './../contexts/ConfigContext'; // Import ConfigContext
-
+import isAuthenticated from './../utils/isAuthenticated';
+import { useNavigate } from 'react-router-dom';
 function HomePage() {
     const [products, setProducts] = useState([]);
     const [filters, setFilters] = useState({}); // e.g., { category: 'Electronics' }
     const [sort, setSort] = useState({}); // e.g., { sortBy: 'price', sortOrder: 'asc' }
     const { getApiUrl } = useContext(ConfigContext); // Use useContext to access getApiUrl
+    const navigate = useNavigate();
 
     useEffect(() => {
+        if (!isAuthenticated()) {
+            navigate('/login');
+        }
         const fetchProducts = async () => {
             const apiUrl = getApiUrl(); // Use getApiUrl to get the API URL
             try {
