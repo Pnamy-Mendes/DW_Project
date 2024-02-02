@@ -1,0 +1,9 @@
+.user-type-form .field {
+    margin-bottom: 1em;
+}
+
+.user-type-form .form-buttons {
+    margin-top: 1em;
+    display: flex;
+    justify-content: flex-end;
+}

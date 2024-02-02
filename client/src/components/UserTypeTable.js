@@ -32,7 +32,7 @@ const UserTypeTable = ({ userTypes, onEdit, onDelete, selectedUserTypes, onSelec
 
     const actionBodyTemplate = (rowData) => (
         <React.Fragment>
-            <Button icon="pi pi-pencil" onClick={() => onEdit(rowData)} />
+            <Button icon="pi pi-pencil" className="mr-2" onClick={() => onEdit(rowData)} />
             <Button icon="pi pi-trash" className="p-button-danger" onClick={() => onDelete(rowData)} />
         </React.Fragment>
     );
@@ -58,7 +58,7 @@ const UserTypeTable = ({ userTypes, onEdit, onDelete, selectedUserTypes, onSelec
             header={header}
             responsiveLayout="scroll"
         >
-            <Column selectionMode="multiple" />
+            <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}/>
             <Column field="name" header="User Type" sortable />
             <Column header="Permissions" body={permissionTemplate} />
             <Column body={actionBodyTemplate} />

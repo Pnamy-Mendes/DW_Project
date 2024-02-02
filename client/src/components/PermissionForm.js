@@ -1,4 +1,3 @@
-// PermissionForm.js
 import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -21,6 +20,10 @@ const PermissionForm = ({ permission, onSave, onCancel }) => {
         onSave(localPermission); // Use onSave from props to save the localPermission state
     };
 
+    const handleCancel = () => {
+        onCancel(); // Simply close the form without saving
+    };
+
     return (
         <form className="p-fluid" onSubmit={handleSave}>
             <div className="field">
@@ -33,7 +36,7 @@ const PermissionForm = ({ permission, onSave, onCancel }) => {
             </div>
             {/* Add other fields as necessary */}
             <div className="flex justify-content-end mt-3">
-                <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={onCancel} />
+                <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={handleCancel} />
                 <Button label="Save" icon="pi pi-check" className="p-button-text" type="submit" />
             </div>
         </form>

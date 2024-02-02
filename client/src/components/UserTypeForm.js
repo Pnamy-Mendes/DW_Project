@@ -4,6 +4,8 @@ import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
 import { Button } from 'primereact/button';
 
+import './css/UserTypeForm.css'
+
 const UserTypeForm = ({ userType, onSave, onCancel, allPermissions }) => {
     const [localUserType, setLocalUserType] = useState({ ...userType, permissions: userType.permissions.map(perm => perm._id) });
 

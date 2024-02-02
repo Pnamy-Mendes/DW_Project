@@ -8,45 +8,55 @@ const mongoose = require('mongoose');
 
 console.log(process.env.GITHUB_CLIENT_ID);
 
-// Reusable function to set cookie
-function setUserInfoCookie(res, user) {
-    res.cookie('userInfo', { userId: user._id, username: user.username }, {
-        secure: true, 
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        sameSite: 'Lax'
-    });
-}
+// Reusable function to set user info and permissions in the cookie
+async function setUserInfoAndPermissions(res, user) {
+    try {
+        const populatedUser = await User.findById(user._id)
+            .populate({
+                path: 'typeUser',
+                populate: { path: 'permissions' }
+            });
 
+        if (populatedUser.typeUser && populatedUser.typeUser.permissions) {
+            const permissions = populatedUser.typeUser.permissions.map(perm => perm.level);
+
+            // Set the userInfo cookie
+            res.cookie('userInfo', JSON.stringify({ userId: user._id, username: user.username }), {
+                secure: true,
+                httpOnly: false, // You might want to set httpOnly to true for security reasons
+                maxAge: 30 * 24 * 60 * 60 * 1000, // Cookie expiration
+                sameSite: 'Lax'
+            });
+
+            // Set a separate cookie for permissions
+            res.cookie('userPermissions', JSON.stringify(permissions), {
+                secure: true,
+                httpOnly: false, // You might want to set httpOnly to true for security reasons
+                maxAge: 30 * 24 * 60 * 60 * 1000, // Cookie expiration
+                sameSite: 'Lax'
+            });
+        } else {
+            console.error('Permissions or typeUser not found for user:', user.username);
+        }
+    } catch (error) {
+        console.error('Error setting user info and permissions:', error);
+    }
+}
 
 // Registration route
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password, name} = req.body;
-        console.log(username, email, password, name) 
-
-        // Convert the defaultTypeUserId string to ObjectId
+        const { username, email, password, name } = req.body;
         const defaultTypeUserId = new mongoose.Types.ObjectId('65b6a77f17a2772efba9193b');
         const defaultTypeUser = await TypeUser.findById(defaultTypeUserId);
-        /* console.log(defaultTypeUserId)  */
 
-        /* const typeName = 'User'; // Replace with the desired name
-        const typeUser = await TypeUser.findOne({ name: typeName });
-        console.log(typeUser) */
-
-
-        if (!defaultTypeUser) {
-            return res.status(404).json({ message: "Default defaultTypeUser not found" });
-        }
+        if (!defaultTypeUser) return res.status(404).json({ message: "Default TypeUser not found" });
 
         let userByUsername = await User.findOne({ lowercaseUsername: username.toLowerCase() });
-        if (userByUsername) {
-            return res.status(400).json({ message: "Username already exists", errorField: 'username' });
-        }
+        if (userByUsername) return res.status(400).json({ message: "Username already exists", errorField: 'username' });
 
         let userByEmail = await User.findOne({ email: email.toLowerCase() });
-        if (userByEmail) {
-            return res.status(400).json({ message: "Email already exists", errorField: 'email' });
-        }
+        if (userByEmail) return res.status(400).json({ message: "Email already exists", errorField: 'email' });
 
         const hashedPassword = bcrypt.hashSync(password, 12);
         const newUser = new User({
@@ -54,12 +64,12 @@ router.post('/register', async (req, res) => {
             username,
             lowercaseUsername: username.toLowerCase(),
             email,
-            password: hashedPassword, 
-            defaultTypeUser: defaultTypeUser._id
+            password: hashedPassword,
+            typeUser: defaultTypeUser._id
         });
-        await newUser.save();
 
-        setUserInfoCookie(res, newUser);
+        await newUser.save();
+        await setUserInfoAndPermissions(res, newUser);
         res.status(201).json({ message: "User created successfully", user: { id: newUser._id, username: newUser.username, email: newUser.email } });
     } catch (error) {
         console.error(error);
@@ -67,26 +77,21 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// GitHub OAuth route
+router.get('/auth/github', (req, res) => {  
+    const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}`;
+    res.redirect(url);
+});
+
 // Login route
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await User.findOne({ lowercaseUsername: username.toLowerCase() }); 
-
-        console.log("User found:", user);
-        console.log("Received username:", username);
-        console.log("Received password:", password);
-        
-        // Additional debugging
-        console.log("Hashed password in the database:", user.password);
-        
-        const isPasswordMatch = bcrypt.compareSync(password, user.password);
-        console.log("Comparison result:", isPasswordMatch);
-         
+        const user = await User.findOne({ lowercaseUsername: username.toLowerCase() }).populate('typeUser');
 
         if (user && bcrypt.compareSync(password, user.password)) {
-            setUserInfoCookie(res, user);
-            res.status(200).json({ message: "Login successful", user: { id: user._id, username: user.username } });
+            await setUserInfoAndPermissions(res, user);
+            res.status(200).json({ message: "Login successful", user: { id: user._id, username: user.username }, permissions: user.typeUser.permissions.map(perm => perm.level) });
         } else {
             res.status(401).json({ message: "Invalid credentials" });
         }
@@ -142,7 +147,7 @@ router.get('/auth/github/callback', async (req, res) => {
         }
         await user.save();
 
-        setUserInfoCookie(res, user);       
+        await setUserInfoAndPermissions(res, user);  
         res.redirect(`${process.env.REACT_APP_API_BASE_URL}:3000/`);
     } catch (error) {
         console.error("Error during GitHub OAuth callback: ", error);

@@ -34,8 +34,8 @@ router.get('/', async (req, res) => {
     try {
         // Populate subSubCategories to show their details instead of just IDs
         const products = await Product.find().populate('subSubCategories');
-        console.log(products)
-        res.json(products);
+        /* console.log(products) */
+        res.json(products); 
     } catch (err) {
         res.status(500).json({ message: 'Error fetching products', error: err.message });
     }
@@ -57,7 +57,7 @@ router.get('/:productId', async (req, res) => {
 
 // Create a new product
 router.post('/', async (req, res) => {
-    console.log(req.body)
+    /* console.log(req.body) */
     const { subSubCategories = [], ...productData } = req.body; // Provide a default value of an empty array
     const product = new Product({
         ...productData,
@@ -66,10 +66,10 @@ router.post('/', async (req, res) => {
 
     try {
         const newProduct = await product.save();
-        console.log("Saved product:", newProduct); // Log the saved product
+        /* console.log("Saved product:", newProduct); */ // Log the saved product
         res.status(201).json(newProduct);
     } catch (err) {
-        console.error("Error saving product:", err); // Log any errors
+        /* console.error("Error saving product:", err);  */// Log any errors
         res.status(400).json({ message: 'Error creating product', error: err.message });
     }
 });

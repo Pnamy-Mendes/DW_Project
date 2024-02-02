@@ -15,63 +15,67 @@ import GitHubMark from '../media/github-mark-white.png';
 import ConfigContext from './../contexts/ConfigContext' 
 
 
-function LoginForm({ showToast}) {
+function LoginForm({ showToast }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [isOAuthLogin, setIsOAuthLogin] = useState(false);
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const { getApiUrl } = useContext(ConfigContext);
-    const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
+    const apiUrl = getApiUrl();
+    const [isOAuthLogin, setIsOAuthLogin] = useState(false); // Track if login is initiated via GitHub
+
+    const handleGitHubLogin = () => {
+        setIsOAuthLogin(true); // Set OAuth login to true
+        window.location.href = `${apiUrl}:3001/auth/github`;
+    };
 
     useEffect(() => {
         if (isAuthenticated()) {
             navigate('/');
         }
-
-        // Check if the user clicked on github Login so it ifnores the error handling
-        if (!isOAuthLogin) {
+        if (!isOAuthLogin && (!username || !password)) {
             const errorParam = searchParams.get('error');
             if (errorParam) {
-                showToast('error', 'Error', decodeURIComponent(errorParam));
+                setError(decodeURIComponent(errorParam));
+                if (showToast) {
+                    showToast('error', 'Error', decodeURIComponent(errorParam));
+                }
             }
-        }    
-    }, [navigate, searchParams]);
+        }
+    }, [navigate, searchParams, showToast]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Check if username and/or password are missing
-        if (!isOAuthLogin) {
-            console.log('Not OAuth login');
+        if (!isOAuthLogin && (!username || !password)) {
             if (!username || !password) {
-                const missingFields = [];
-                if (!username) missingFields.push('username');
-                if (!password) missingFields.push('password');
-                const errorMessage = `Please enter your ${missingFields.join(' and ')}`;
-                showToast('warn', 'Warning', errorMessage);
+                const errorMessage = 'Please enter your username and password.';
                 setError(errorMessage);
+                if (showToast) {
+                    showToast('warn', 'Warning', errorMessage);
+                }
                 return;
             }
         }
+
         try {
             const response = await axios.post(`${apiUrl}:3001/login`, { username, password }, { withCredentials: true });
+            localStorage.setItem('userPermissions', JSON.stringify(response.data.permissions || []));
             navigate('/');
         } catch (error) {
             if (error.response) {
-                showToast('error', 'Error', error.response.data.message);
                 setError(error.response.data.message);
+                if (showToast) {
+                    showToast('error', 'Error', error.response.data.message);
+                }
+            } else {
+                setError('An error occurred');
             }
         }
     };
+ 
 
-    const handleGitHubLogin = () => {
-        // Redirect to your backend OAuth route
-        setIsOAuthLogin(true);
-        window.location.href = `${apiUrl}:3001/auth/github`;
-        // Bypass the error handling here if needed
-    };
 
     return (
         <div className="login-page">

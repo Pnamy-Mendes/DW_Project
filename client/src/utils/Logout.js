@@ -1,4 +1,3 @@
-// src/components/Logout.js or src/utils/Logout.js
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -7,17 +6,12 @@ function Logout() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Clear the authentication cookie
-        Cookies.remove('userInfo');
-
-        // Redirect to the login page or home page after logout
-        navigate('/login'); // Adjust the redirection path as necessary
-
-        // Optionally, update the application state as necessary
-        // For example, update context or redux state to reflect the logout
+        Cookies.remove('userInfo'); // Clear the authentication cookie
+        Cookies.remove('userPermissions'); // Clear the permissions cookie
+        navigate('/login'); // Redirect to the login page
     }, [navigate]);
 
-    return null; // This component does not render anything
+    return null;
 }
 
 export default Logout;

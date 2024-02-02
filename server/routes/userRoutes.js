@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../models/User'); // Ensure the path is correct
+const User = require('../models/User');
 const TypeUser = require('../models/TypeUser');
 const Permission = require('../models/Permission');
 const mongoose = require('mongoose');
@@ -9,10 +9,12 @@ const router = express.Router();
 // Get all users with their types and permissions
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find().populate({
-            path: 'typeUser',
-            populate: { path: 'permissions' }
-        });
+        const users = await User.find()
+            .populate('typeUser') // Populate the 'typeUser' field
+            .populate({
+                path: 'typeUser',
+                populate: { path: 'permissions' }
+            });
         res.json(users);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching users', error: err.message });
@@ -22,7 +24,7 @@ router.get('/', async (req, res) => {
 // Get a single user by ID
 router.get('/:userId', async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        const user = await User.findById(req.params.userId).populate('typeUser'); // Populate the 'typeUser' field
         if (!user) return res.status(404).json({ message: 'User not found' });
         res.json(user);
     } catch (err) {
@@ -36,6 +38,11 @@ router.post('/', async (req, res) => {
     const user = new User(userData);
 
     try {
+        // Check if 'typeUser' field exists in the request and is a valid ObjectId
+        if (req.body.typeUser && mongoose.Types.ObjectId.isValid(req.body.typeUser)) {
+            user.typeUser = req.body.typeUser;
+        }
+
         const newUser = await user.save();
         res.status(201).json(newUser);
     } catch (err) {
@@ -48,6 +55,11 @@ router.put('/:userId', async (req, res) => {
     const updateData = req.body; // Assuming req.body contains the fields to update
 
     try {
+        // Check if 'typeUser' field exists in the request and is a valid ObjectId
+        if (req.body.typeUser && mongoose.Types.ObjectId.isValid(req.body.typeUser)) {
+            updateData.typeUser = req.body.typeUser;
+        }
+
         const updatedUser = await User.findByIdAndUpdate(
             req.params.userId,
             updateData,
@@ -71,6 +83,5 @@ router.delete('/:userId', async (req, res) => {
         res.status(400).json({ message: 'Error deleting user', error: err.message });
     }
 });
-
 
 module.exports = router;

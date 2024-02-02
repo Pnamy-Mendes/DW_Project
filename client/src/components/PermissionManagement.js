@@ -5,7 +5,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import PermissionTable from './PermissionTable';
-import PermissionForm from './PermissionForm'; 
+import PermissionForm from './PermissionForm';
 import ConfigContext from './../contexts/ConfigContext';
 
 const PermissionManagement = () => {
@@ -32,7 +32,7 @@ const PermissionManagement = () => {
     };
 
     const openNew = () => {
-        setEditingPermission({ name: '', description: '' });
+        setEditingPermission({ level: '', description: '' });
         setPermissionDialog(true);
     };
 
@@ -42,7 +42,7 @@ const PermissionManagement = () => {
 
     const onSavePermission = async (permissionData) => {
         const method = permissionData._id ? 'put' : 'post';
-        const url = permissionData._id ? `${apiUrl}/api/permissions/${permissionData._id}` : `${apiUrl}/permissions`;
+        const url = permissionData._id ? `${apiUrl}:3001/api/permissions/${permissionData._id}` : `${apiUrl}:3001/api/permissions`;
 
         try {
             await axios[method](url, permissionData);
@@ -67,7 +67,7 @@ const PermissionManagement = () => {
 
     const deletePermission = async () => {
         await Promise.all(selectedPermissions.map(permission => 
-            axios.delete(`${apiUrl}/permissions/${permission._id}`)));
+            axios.delete(`${apiUrl}:3001/api/permissions/${permission._id}`)));
         setDeletePermissionDialog(false);
         fetchPermissions();
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Permission(s) deleted successfully.', life: 3000 });
@@ -75,11 +75,13 @@ const PermissionManagement = () => {
 
     const deleteSelectedPermissions = async () => {
         const deletePromises = selectedPermissions.map(permission => 
-            axios.delete(`${apiUrl}/permissions/${permission._id}`));
+            axios.delete(`${apiUrl}:3001/api/permissions/${permission._id}`));
         try {
             await Promise.all(deletePromises);
             fetchPermissions();
             setSelectedPermissions([]);
+            setDeletePermissionDialog(false);
+            toast.current.show({ severity: 'success', summary: 'Success', detail: 'Permission(s) deleted successfully.', life: 3000 });
         } catch (error) {
             console.error('Error deleting selected permissions:', error);
         }
@@ -89,7 +91,7 @@ const PermissionManagement = () => {
         return (
             <React.Fragment>
                 <Button label="New" icon="pi pi-plus" className="p-button-success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={deleteSelectedPermissions} disabled={!selectedPermissions.length} />
+                <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={() => setDeletePermissionDialog(true)} disabled={!selectedPermissions.length} />
             </React.Fragment>
         );
     };
@@ -108,10 +110,16 @@ const PermissionManagement = () => {
             <Dialog visible={permissionDialog} style={{ width: '450px' }} header="Permission Details" modal onHide={hideDialog}>
                 <PermissionForm permission={editingPermission} onSave={onSavePermission} onCancel={hideDialog} />
             </Dialog>
-            <Dialog visible={deletePermissionDialog} style={{ width: '450px' }} header="Confirm" modal onHide={() => setDeletePermissionDialog(false)}>
+            <Dialog visible={deletePermissionDialog} style={{ width: '450px' }} header="Confirm Deletion" modal onHide={() => setDeletePermissionDialog(false)}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem'}} />
-                    {selectedPermissions && <span>Are you sure you want to delete the selected permission(s)?</span>}
+                    {selectedPermissions && (
+                        <span>Are you sure you want to delete the selected permission(s)?</span>
+                    )}
+                </div>
+                <div className="flex justify-content-end mt-3">
+                    <Button label="No" icon="pi pi-times" className="p-button-text" onClick={() => setDeletePermissionDialog(false)} />
+                    <Button label="Yes" icon="pi pi-check" className="p-button-danger" onClick={deleteSelectedPermissions} />
                 </div>
             </Dialog>
         </div>

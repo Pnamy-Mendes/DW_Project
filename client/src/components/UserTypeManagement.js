@@ -14,8 +14,9 @@ const UserTypeManagement = () => {
     const [userTypeDialog, setUserTypeDialog] = useState(false);
     const [editingUserType, setEditingUserType] = useState({});
     const [deleteUserTypeDialog, setDeleteUserTypeDialog] = useState(false);
+    const [userTypeToDelete, setUserTypeToDelete] = useState(null);
     const toast = useRef(null);
-    const { getApiUrl } = useContext(ConfigContext); 
+    const { getApiUrl } = useContext(ConfigContext);
     const [allPermissions, setAllPermissions] = useState([]);
     const apiUrl = getApiUrl();
 
@@ -23,6 +24,18 @@ const UserTypeManagement = () => {
         fetchPermissions();
         fetchUserTypes();
     }, []);
+
+    // Function to delete the selected user types
+    const confirmDeleteSelectedUserTypes = async () => {
+        await Promise.all(
+            selectedUserTypes.map((userType) => 
+                axios.delete(`${apiUrl}:3001/api/typeUser/${userType._id}`)
+            )
+        );
+        fetchUserTypes(); // Refresh the list
+        hideDeleteUserTypeDialog(); // Hide the dialog
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'User Type(s) deleted successfully.', life: 3000 });
+    };
 
 
     const fetchUserTypes = async () => {
@@ -93,17 +106,45 @@ const UserTypeManagement = () => {
         setUserTypeDialog(true);
     };
 
-    const confirmDeleteUserType = (userType) => {
-        setSelectedUserTypes([userType]);
-        setDeleteUserTypeDialog(true);
+    const deleteUserType = async () => {
+        if (userTypeToDelete) {
+            await axios.delete(`${apiUrl}:3001/api/typeUser/${userTypeToDelete._id}`);
+            fetchUserTypes(); // Refresh the list
+            hideDeleteUserTypeDialog(); // Hide the dialog
+            toast.current.show({ severity: 'success', summary: 'Success', detail: `User Type "${userTypeToDelete.name}" deleted successfully.`, life: 3000 });
+        }
     };
 
-    const deleteUserType = async () => {
-        await Promise.all(selectedUserTypes.map(userType => axios.delete(`${apiUrl}:3001/api/typeUser/${userType._id}`)));
+    const confirmDeleteUserType = (userType) => {
+        setUserTypeToDelete(userType); // Save the user type to be deleted
+        setDeleteUserTypeDialog(true); // Show the confirmation dialog
+    };
+
+    const hideDeleteUserTypeDialog = () => {
+        setDeleteUserTypeDialog(false);
+        setUserTypeToDelete(null); // Clear the user type to be deleted
+    };
+
+    const deleteSelectedTypeUser = async () => {
+        // Map through all selected user types and delete them
+        await Promise.all(
+            selectedUserTypes.map((userType) => 
+                axios.delete(`${apiUrl}:3001/api/typeUser/${userType._id}`)
+            )
+        );
+        // Close dialog and show success message
         setDeleteUserTypeDialog(false);
         fetchUserTypes();
-        toast.current.show({ severity: 'success', summary: 'Success', detail: 'User Type deleted successfully.', life: 3000 });
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'User Type(s) deleted successfully.', life: 3000 });
     };
+
+    const deleteUserTypeDialogFooter = (
+        <React.Fragment>
+            <Button label="No" icon="pi pi-times" onClick={hideDeleteUserTypeDialog} className="p-button-text" />
+            <Button label="Yes" icon="pi pi-check" onClick={deleteUserType} className="p-button-danger" />
+        </React.Fragment>
+    ); 
+ 
 
     const leftToolbarTemplate = () => {
         return (
@@ -118,31 +159,42 @@ const UserTypeManagement = () => {
         <div>
             <Toast ref={toast} />
             <Toolbar className="mb-4" left={leftToolbarTemplate} />
-            <UserTypeTable 
-                userTypes={userTypes} 
-                onEdit={editUserType} 
-                onDelete={confirmDeleteUserType} 
-                selectedUserTypes={selectedUserTypes} 
+            <UserTypeTable
+                userTypes={userTypes}
+                onEdit={editUserType}
+                onDelete={confirmDeleteUserType}
+                selectedUserTypes={selectedUserTypes}
                 onSelectionChange={setSelectedUserTypes}
             />
-            <Dialog visible={userTypeDialog} style={{ width: '450px' }} header="User Type Details" modal onHide={hideDialog}>
-                <UserTypeForm 
-                    userType={editingUserType} 
-                    onSave={onSaveUserType} 
-                    onCancel={hideDialog} 
-                    allPermissions={allPermissions} 
+            <Dialog
+                visible={userTypeDialog}
+                style={{ width: '450px' }}
+                header="User Type Details"
+                modal
+                onHide={hideDialog}
+            >
+                <UserTypeForm
+                    userType={editingUserType}
+                    onSave={onSaveUserType}
+                    onCancel={hideDialog}
+                    allPermissions={allPermissions}
                 />
             </Dialog>
-            <Dialog 
-                visible={deleteUserTypeDialog} 
-                style={{ width: '450px' }} 
-                header="Confirm" 
-                modal 
-                onHide={() => setDeleteUserTypeDialog(false)}
+            <Dialog
+                visible={deleteUserTypeDialog}
+                style={{ width: '450px' }}
+                header="Confirm Deletion"
+                modal
+                footer={deleteUserTypeDialogFooter}
+                onHide={hideDeleteUserTypeDialog}
             >
                 <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem'}} />
-                    {selectedUserTypes && <span>Are you sure you want to delete the selected user type(s)?</span>}
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {userTypeToDelete && (
+                        <span>
+                            Are you sure you want to delete the user type <b>"{userTypeToDelete.name}"</b>?
+                        </span>
+                    )}
                 </div>
             </Dialog>
         </div>

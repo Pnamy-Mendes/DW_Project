@@ -17,9 +17,14 @@ const UserManagement = () => {
     const toast = useRef(null); 
     const { getApiUrl } = useContext(ConfigContext);
     const apiUrl = getApiUrl(); // Use this apiUrl for your API calls
+    const [userTypes, setUserTypes] = useState([]);
 
     useEffect(() => {
         fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        fetchUserTypes().then(data => setUserTypes(data));
     }, []);
 
     const fetchUsers = async () => {
@@ -28,6 +33,16 @@ const UserManagement = () => {
             setUsers(response.data);
         } catch (error) {
             console.error('Error fetching users:', error);
+        }
+    };
+
+    const fetchUserTypes = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}:3001/api/typeUser`); // Adjust the API endpoint as needed
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user types:', error);
+            return [];
         }
     };
 
@@ -103,10 +118,16 @@ const UserManagement = () => {
                 confirmDeleteUser={confirmDeleteUser} 
                 selectedUsers={selectedUsers} 
                 setSelectedUsers={setSelectedUsers}
+                userTypes={userTypes}
                  
             />
             <Dialog visible={userDialog} style={{ width: '450px' }} header="User Details" modal onHide={hideDialog}>
-                <UserForm user={editingUser} onSave={onSaveUser} onCancel={hideDialog} />
+                <UserForm 
+                    	user={editingUser} 
+                        onSave={onSaveUser} 
+                        onCancel={hideDialog} 
+                        userTypes={userTypes}
+                />
             </Dialog>
             <Dialog visible={deleteUserDialog} style={{ width: '450px' }} header="Confirm" modal /* footer={deleteUserDialogFooter} */ onHide={() => setDeleteUserDialog(false)}>
                 <div className="confirmation-content">
